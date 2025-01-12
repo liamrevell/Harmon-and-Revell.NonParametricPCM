@@ -15,7 +15,7 @@ affiliation:
   - code: 2
     address: Department of Biology, University of Massachusetts Boston, Boston, MA, USA
 abstract: >
-  This article describes a new semi-parametric method to test for an evolutionary correlation between continuously valued species traits.
+  Phylogenetic comparative methods are a broad suite of approaches for studying trait and species diversification using evolutionary trees. In spite of their extraordinary growth in sophistication and complexity in recent years, among the most commonly-employed phylogenetic comparative method is the simple measure of the evolutionary correlation between variables, whilst accounting for the statistical non-independence that arises from common descent. The standard parametric approach for measuring the evolutionary correlation of continuously-valued characters on a phylogeny assumes a model called Brownian motion for the evolution of our traits. Here, we introduce a new semi-parametric method that relaxes this assumption by testing for the evolutionary correlation between variables based on ranks, and then obtaining a null distribution on the test statistic via random permutation. We show that this approach has reasonable statistical properties: type I error close to the nominal level, and power that is similar to fully parametric methods. We conclude by comparing our new method to related approaches. 
 header-includes: |
     \usepackage{fancyhdr}
     \pagestyle{fancy}
@@ -33,62 +33,648 @@ csl: evolution.csl
 ---
 
 ```{r, echo=FALSE, results="hide", message=FALSE}
+## load phylogenetics libraries
+library(geiger)
 library(phytools)
+
+## to parallelize
+library(parallel)
+library(doParallel)
+library(foreach)
+```
+```{r, echo=FALSE, results="hide", message=FALSE}
+picRegression <- function (tree, x, y, method="standard", sigTest="permutation",
+  ...) 
+{
+  ## original version was missing nperm argument so I added it (LR)
+  if(hasArg(nperm)) nperm<-list(...)$nperm
+  else nperm<-100
+  if (!inherits(tree, "phylo")) 
+    stop("tree should be object of class \"phylo\".")
+  
+  if (method %in% c("standard", "sign", "rank") == FALSE) {
+    cat("  Invalid model. Setting model=\"standard\"\n\n")
+    model <- "standard"
+  }
+  
+  if (sigTest %in% c("analytic", "permutation") == FALSE) {
+    cat("  Invalid model. Setting model=\"permutation\"\n\n")
+    sigTest <- "permutation"
+  }
+  
+  if((method=="sign" | method=="rank")&sigTest=="analytic") {
+    cat("  No analytic p-value method exists for method ", method, ". Setting model=\"permutation\"\n\n")
+    sigTest <- "permutation"
+  }
+  
+  if(method=="standard") {
+    icx<-ape::pic(x, tree)
+    icy<-ape::pic(y, tree)
+    
+    if(sigTest=="analytic") {
+      res<-summary(lm(icy~icx+0))
+      testStat<-res$coefficients[1,3]
+      pVal<-res$coefficients[1,4]
+    }
+    if(sigTest=="permutation") {
+      dicx<-c(icx, -icx)	
+      dicy<-c(icy, -icy)
+      res<-summary(lm(dicy~dicx))
+      testStat<-res$coefficients[2,3]
+      nullDist<-numeric(nperm)
+      for(i in 1:nperm) {
+        picx<-sample(icx)
+        dpicx<-c(picx, -picx)
+        res<-summary(lm(dicy~dpicx))
+        nullDist[i]<-res$coefficients[2,3]
+      }
+      
+      pValueHigh<-2*(sum(nullDist >= testStat)+1)/(nperm+1)
+      pValueLow<-2*(sum(nullDist <= testStat)+1)/(nperm+1)
+      
+      pVal<-min(pValueHigh, pValueLow)
+    }
+      
+  }
+  
+  if(method=="sign") {
+    icx<-ape::pic(x, tree)
+    icy<-ape::pic(y, tree)
+    xPos<-icx>0
+    yPos<-icy>0
+    testStat<-sum(xPos==yPos)
+    pValueLow<-2*pbinom(testStat, length(icx), prob=0.5)
+    pValueHigh<-2*pbinom(length(icx)-testStat, length(icx), prob=0.5)
+    pVal<-min(pValueHigh, pValueLow)
+  }
+  
+  if(method=="rank") {
+    icx<-ape::pic(x, tree)
+    icy<-ape::pic(y, tree)
+    
+    dicx<-c(icx, -icx)	
+    dicy<-c(icy, -icy)
+    
+    rx<-rank(dicx, ties.method="average")
+    ry<-rank(dicy, ties.method="average")
+    res<-summary(lm(ry~rx))
+    testStat<-res$coefficients[2,3]
+    
+    nullDist<-numeric(nperm)
+    for(i in 1:nperm) {
+      picx<-sample(icx)
+      dpicx<-c(picx, -picx)
+      prx<-rank(dpicx, ties.method="average")
+      res<-summary(lm(ry~prx))
+      nullDist[i]<-res$coefficients[2,3]
+    }
+    
+    pValueHigh<-2*(sum(nullDist >= testStat)+1)/(nperm+1)
+    pValueLow<-2*(sum(nullDist <= testStat)+1)/(nperm+1)
+    
+    pVal<-min(pValueHigh, pValueLow)
+    
+  }
+  
+  
+  obj <- list(testStat=testStat, pVal=pVal)
+  class(obj) <- "picRegression"
+  obj
+}
 ```
 # Introduction
 
-Statistical phylogenetic comparative methods are an invaluable tool in modern evolutionary research (Felsenstein 1985; Revell and Harmon 2022). This set of methodologies allows us to test a broad range of evolutionary hypotheses for species-level data, while taking into account non-independence due to their shared histories (reviewed in Harmon 2019; Revell & Harmon 2022). Typically, phylogenetic comparative methods assume a particular underlying model of trait evolution, such as Brownian motion (Felsenstein 1973) for continuously valued traits. Although there are some circumstances under which phenotypic traits might genuinely evolve via a Brownian process (e.g. Lynch 1990), violations of the Brownian model are likely be common in real data sets (Estes and Arnold 2007; Hunt 2006; Uyeda et al. 2011; Freckleton and Harvey 2006). Nonetheless, the Brownian motion model has persisted due to its simplicity and apparent robustness to deviations from model assumptions under some circumstances (Garland et al. 1993; Stone 2011).
+Statistical phylogenetic comparative methods have become an invaluable tool in contemporary evolutionary research [@Felsenstein1985; @Revell2022-book]. This set of methodologies comprises a large and growing set of approaches for studying increasingly sophisticated evolutionary hypotheses of trait and species diversification using phylogenies [reviewed in @Harvey1991; @Nunn2011-book; @OMeara2012; @Harmon2019-book; @Revell2022-book]. Nonetheless, among the most common evolutionary hypothesis studied by researchers is the simple question of whether one trait is correlated with another, while accounting for the statistical non-independence of the species that that make up our data points due to their shared histories [@Felsenstein1985; reviewed in @Harmon2019-book; @Revell2022-book].
 
-There are a few methods available to identify violations of Brownian motion models and then to account for these deviations statistically. First, one can apply various diagnostic tests for independent contrasts that are sensitive to a variety of violations of the Brownian model (Garland 1992; Freckleton and Harvey 2006; Blomberg et al. 2003). For, if the true model is Brownian motion, then standardized independent contrasts of Felsenstein (1985) should be independently and identically distributed (i.i.d). If, on the other hand, standardized contrasts are correlated with their expected variance (the amount of evolutionary branch length that subtends the contrast), this suggests that there is more or less change along long branches of the tree (depending on the sign of the correlation) than expected under Brownian motion. One can then attempt various transformations of the branch lengths of the tree so that the contrasts no longer violate our test (Garland et al., 1992). Another similar diagnostic is the node-height test, in which we check for a relationship between the standardized contrasts and the height of the node over which they are calculated (Freckleton and Harvey 2006). Once again, this correlation should be absent if model assumptions hold. In both instances, one can consider these tests to be measurements of model adequacy, where failure of the test suggests that the underlying assumption of Brownian motion may be invalid (Pennell et al. 2015).
+When measuring and undertaking a hypothesis test of this correlation, phylogenetic comparative methods must typically assume a particular underlying model of trait evolution, such as the Brownian motion model [@Felsenstein1973a; @Felsenstein1985; @OMeara2006]. In particular, under the algorithm of phylogenetically independent contrasts, both the internal node values in the contrasts algorithm, and the variances of the (non-standardized) contrasts are calculated assuming a Brownian evolutionary process on the tree [@Felsenstein1985; @Harmon2019-book]. Likewise, under phylogenetic generalized least squares regression [@Grafen1989], we assume that either the data themselves or their residual error are autocorrelated in a manner consistent with Brownian motion evolution or a close relative [e.g., @Pagel1999; @Garland2000; @Rohlf2001; @Revell2010]. Although there are some circumstances under which continuously-valued phenotypic traits might genuinely evolve via a Brownian process [e.g., @Lynch1990], violations of the Brownian model are likely be common in real data sets [@Freckleton2006; @Hunt2006; @Estes2007; @Uyeda2011]. The Brownian motion model has nonetheless persisted as one of the most commonly-used trait evolution models in studying evolutionary correlations, largely due to its simplicity, tractability, and apparent robustness to deviations from model assumptions under some circumstances [e.g., @Garland1993; @Stone2011].
 
-Under circumstances in which the Brownian motion assumption is violated, one can always consider alternative models. In phylogenetic comparative methods,however, our alternative models are typically limited to a few simple alternatives. One can attempt, for example, different evolutionary models that are nonetheless Gaussian, such as the Ornstein-Uhlenbeck or a speciational trait evolution models. Likewise, one can transform the branches of the phylogenetic tree or the elements of the variance-covariance matrix derived from the tree. Nonetheless, there is no general solution and on occasion there may be no way to coax certain data sets to fit the particular assumptions of our analyses.
+A number of approaches have been devised to identify violations of Brownian motion in our data in measuring the evolutionary correlation, and then to account for these deviations statistically. First, one can apply various diagnostic tests for independent contrasts that are sensitive to a variety of violations of the Brownian model [@Garland1992; @Blomberg2003; @Freckleton2006]. For example, if the true model is Brownian motion, then standardized independent contrasts of @Felsenstein1985 should be independently and identically distributed (i.i.d.). If, on the other hand, standardized contrasts are correlated with their expected variance (the amount of evolutionary branch length that subtends the contrast), this suggests that there is more or less change along long branches of the tree (depending on the sign of the correlation) than expected under Brownian motion. One can then attempt various transformations of the branch lengths of the tree so that the contrasts no longer violate our test [@Garland1992]. Another similar diagnostic is the node-height test, in which we test for a relationship between the standardized contrasts and the height of the node over which they are calculated [@Freckleton2006]. Once again, this correlation should be absent if the Brownian motion model assumptions hold. In both instances, one can consider these tests to be measurements of model adequacy, where failure of the test suggests that the underlying assumption of Brownian motion could be invalid [@Pennell2015].
 
-In statistics, nonparametric tests can sometimes provide robustness in cases where models are not known or provide poor fits to data (e.g. Wasserman, 2005). As comparative methods are employed to tackle a wider and wider range of problems, from genomics to cancer biology to evolutionary studies at the broadest scale, there is a growing need for methods that are robust to model violations. Among existing comparative methods, there are nonparametric methods available for the analysis of discrete characters (e.g. Maddison, 1990) and morphometric shape data (Adams 2014). To date, however, the only available nonparametric comparative method designed specifically for continuously distributed trait data is Ackerly's (2000) contrast sign test (CST). This test compares the signs (positive or negative) of phylogenetically independent contrasts for two characters. If the two characters are evolving independently, then the number of pairs of contrasts with the same sign should follow a binomial distribution with probability of success p=0.5. This test provides a robust alternative to parametric comparative methods, but is not commonly used. The main drawback of Ackerly's approach is that it has low power, partially because it uses only the signs, and not the magnitudes, of the contrasts. 
+Under circumstances in which the Brownian motion assumption is violated, one can always consider alternative models [e.g., @Pagel1999]. In phylogenetic comparative methods,however, our alternative models are typically limited to a few simple alternatives. One can attempt, for example, different evolutionary models that are nonetheless Gaussian, such as the Ornstein-Uhlenbeck or a speciational trait evolution models [e.g., @Hansen1997; @Martins1997]. Likewise, one can transform the branches of the phylogenetic tree or the elements of the variance-covariance matrix derived from the tree [@Grafen1989; @Garland1992; @Pagel1999]. Nonetheless, there is no general solution and on occasion there may be no way to coax certain data sets to fit the particular assumptions of our analyses.
+
+In statistics, nonparametric tests can sometimes provide robustness in cases where models are not known or provide poor fits to data [e.g., @Wasserman2006]. As comparative methods are employed to tackle a wider and wider range of problems, from genomics to cancer biology to evolutionary studies at the broadest scale, there is a growing need for methods that are robust to model violations. Among existing comparative methods, there are nonparametric methods available for the analysis of discrete characters [e.g., @Maddison1990] and morphometric shape data [@Adams2014]. To date, however, the only available nonparametric comparative method designed specifically for continuously distributed trait data is Ackerly's [-@Ackerly2000] contrast sign test (CST). This test compares the signs (positive or negative) of phylogenetically independent contrasts for two characters. If the two characters are evolving independently, then the number of pairs of contrasts with the same sign should follow a binomial distribution with probability of success p=0.5. This test provides a robust alternative to parametric comparative methods, but is not commonly used. The main drawback of Ackerly's approach is that it has low power, partially because it uses only the signs, and not the magnitudes, of the contrasts. 
 
 Here we describe a new semiparametric comparative method, the phylogenetic rank correlation (PRC) test. 
 
-This test, which is based on the correlation of ranks of independent contrasts on a phylogenetic tree, is robust under several models of trait evolution, and has power comparable to standard independent contrasts and much greater than the CST. The PRC test thus may provide a robust alternative to parametric methods such as PGLS and independent contrasts. 
+This test, which is based on the correlation of ranks of independent contrasts on a phylogenetic tree, is robust under several models of trait evolution, and has power comparable to standard independent contrasts and much greater than the CST. We argue that the PRC test thus may provide a robust alternative to parametric methods such as PGLS and independent contrasts. 
 
 # Description of the Method
 
-The PRC test has six steps (Fig. 1): 
+The PRC test has six steps (Figure 1): 
 
-1. Calculate standardized independent contrasts (Felsenstein, 1985) for two continuously distributed traits. 
+1. Calculate standardized independent contrasts [@Felsenstein1985] for two continuously distributed traits. 
 
-2. Reflect the contrasts, multiplying both the X and Y value of each contrast by -1. The data will now include two 'copies' of each contrast, one with the signs of each contrast reversed. 
+2. Reflect the contrasts, multiplying both the $X$ and $Y$ value of each contrast by $-1$. The data will now include two 'copies' of each contrast, one with the signs of each contrast reversed. 
 
 3. Create ranks independently for each variable. For tied scores, assign the mean rank to all tied contrasts. 
 
 4. Calculate the test statistic. Here, we use Spearman's rank correlation coefficient, but one could also use Kendall's $\tau$. 
 
-5. Generate the null distribution of the test statistic via randomization of the original contrasts. To do this, permute the independent contrasts for one variable. Then, double these permuted contrasts, create new ranks, and calculate the test statistic. Repeat this permutation procedure a large number of times (say, 9,999) to generate a null distribution. 
+5. Generate the null distribution of the test statistic via randomization of the contrasts. To do this, permute the independent contrasts for one variable. Then, create new ranks, and calculate the test statistic. Repeat this permutation procedure a large number of times (say, 9,999) to generate a null distribution. (We can either permute the doubled contrasts or permute the original contrasts and double them -- the result will be the same.)
 
-6. Compare the test statistic with the null distribution to obtain a P-value. 
+6. Compare the test statistic with the null distribution from permutation to obtain a P-value of the test.
+
+```{r Harmon-fig1, echo=FALSE, fig.width=6, dpi=300, include=TRUE, fig.cap="Illustration of the method of phylogenetic rank contrasts, PRC. First, compute the raw contrasts. For a bifurcation tree with $N$ tips there should be $N-1$ such contrasts. Next, standardize the contrasts by their expected variance in the typical way following Felsenstein (1985). Duplicate all pairs of contrasts for each of our two variable but swapping the signs. Convert all contrasts (and their reflections) to ranks. Calculate the test-statistic. See main text for more details.", echo=FALSE, out.width = "100%"}
+knitr::include_graphics("schematic.pdf")
+```
 
 Several of these steps require additional comments or explanations. 
 
-For step one, standardized contrasts are calculated. The calculation of these contrasts, as originally described by Felsenstein (1985), assumes a Brownian motion model of evolution; however, since the standardized contrasts are converted into ranks, violating this assumption has little effect on the analysis (see below). In practice, by converting contrasts into ranks, we assume only that contrasts subtending longer branches of the tree tend to be larger in absolute magnitude. This assumption is compatible with a wide range of evolutionary models as long as variance among species tends to increase through time (see Estes and Arnold 2007). 
+For step one, standardized contrasts are calculated. The calculation of these contrasts, as originally described by @Felsenstein1985, assumes a Brownian motion model of evolution; however, since the standardized contrasts are converted into ranks, violating this assumption has little effect on the analysis (see below). In practice, by converting contrasts into ranks, we assume only that contrasts subtending longer branches of the tree tend to be larger in absolute magnitude. This assumption is compatible with a wide range of evolutionary models as long as variance among species tends to increase through time [see @Estes2007]. 
 
-Reflecting the contrasts (step 2) is necessary because the direction of any particular contrast is arbitrary. Reflecting contrasts across the axes ensures that the analysis is unchanged by rotating the nodes in the tree. This procedure is the statistical equivalent of forcing the regression through the origin, which is required when testing for correlations of independent contrasts. We do not have to worry about inflating degrees of freedom by doubling the number of data points because statistical significance is determined by permutations. 
+Reflecting the contrasts (step 2) is necessary because the direction of any particular contrast is arbitrary. Reflecting contrasts across the axes ensures that the analysis is unchanged by rotating the nodes in the tree. This procedure is the statistical equivalent of forcing the regression through the origin, which is required when testing for correlations of independent contrasts [@Garland1992b]. We do not have to worry about inflating degrees of freedom by doubling the number of data points because statistical significance is to be determined by permutations. 
 
-Finally, in step 4, any nonparametric test statistic could be used for this test (see, e.g. Wasserman, 2005). We used Spearman's rank correlation, which is simply the Pearson product-moment correlation of the ranks of the two variables. Kendall's $\tau$ is another viable option. 
+Finally, in step 4, any nonparametric test statistic could be used for this test [see, e.g., @Wasserman2006]. We used Spearman's rank correlation, which is simply the Pearson product-moment correlation of the ranks of the two variables. Kendall's $\tau$ is another viable option. 
 
-We provide a worked example of the calculations involved in this test in Figure 2. Software to carry out this test, written in the R statistical computing language (R Development Core Team, 2024), is provided in the Appendix, and will be made publicly available as part of the GEIGER package (Harmon et al., 2007; Pennell et al., 2014).
-
-```{r Harmon-fig1, echo=FALSE, fig.width=5, fig.height=2.5, dpi=300, fig.cap="Example figure."}
-tree<-pbtree(n=5,tip.label=LETTERS[1:5])
-plotTree(tree,direction="upwards")
-```
+We provide a worked example of the calculations involved in this test in Figure 2. Software to carry out this test, written in the R statistical computing language [@RCoreTeam2024] and will be made publicly available as part of the GEIGER R package [@Harmon2007; @Pennell2014]
 
 # Statistical properties of the method
 
-We compared the statistical performance of the PRC method with both non-phylogenetic (standard regression) and phylogenetic comparative methods (independent contrasts, IC, and the contrast sign test, CST; see Fig. 2 legend for simulation details). Like independent contrasts and the contrast sign test, the PRC test has appropriate type-I error under a Brownian motion model (Fig. 2a). However, both alternative tests outperform both standard correlation tests and independent contrasts when models of evolution are non-Brownian (Fig. 2b). Independent contrasts fail when there is little phylogenetic structure in the data, as under an Ornstein-Uhlenbeck model with a high $\alpha$ parameter (Fig. 2b). Similarly, standard correlation fails when data has a strong phylogenetic component, as under Brownian motion (Fig. 2b). Both alternative methods have type I error near 5/% under a range of $\alpha$ values. Type I error rates for the rank test are only slightly elevated (7/%) compared to its nominal level. 
+We compared the statistical performance of the PRC method with both non-phylogenetic (standard regression) and phylogenetic comparative methods (independent contrasts, IC, and the contrast sign test, CST; see Fig. 2 legend for simulation details). Like independent contrasts and the contrast sign test, the PRC test has appropriate type-I error under a Brownian motion model (Fig. 2a). However, both alternative tests outperform both standard correlation tests and independent contrasts when models of evolution are non-Brownian (Fig. 2b). Independent contrasts fail when there is little phylogenetic structure in the data, as under an Ornstein-Uhlenbeck model with a high $\alpha$ parameter (Fig. 2b). Similarly, standard correlation fails when data has a strong phylogenetic component, as under Brownian motion (Fig. 2b). Both alternative methods have type I error near 5/% under a range of $\alpha$ values. Type I error rates for the rank test are only slightly elevated (7/%) compared to its nominal level.
 
-Likewise, our PRC method has only slightly less power than standard independent contrasts, and considerably more power than Ackerly's (2000) sign test, over both a range of tree sizes and character correlation values (Fig. 2c-d). The PRC test also outperforms other comparative methods when there is error in phylogenetic branch length estimation. To illustrate this, we simulated data on pure-birth phylogenetic trees (as in Figure 1) but then ran analyses after setting all branch lengths in these trees equal. Under these conditions, both PRC and the contrast sign test have appropriate type I error (CST 2.0/%, PRC 5.7/%), while type I error is elevated for independent contrasts (11.4/%). When the expected correlation between characters is 0.5, PRC again has power similar to independent contrasts (IC 74.6/%, PRC 62.9/%). This test also mimics the situation where one knows tree topology, but branch lengths are either unknown or estimated with high error. 
+```{r, echo=FALSE, eval=FALSE}
+## type I error analysis
+
+## set seed
+set.seed(99)
+
+## set up cluster
+ncores<-max(10,detectCores())
+mc<-makeCluster(ncores,type="PSOCK")
+registerDoParallel(cl=mc)
+
+## first simulate under uncorrelated Brownian motion
+## for two traits
+
+## this is a test of type I error under the null 
+## for standard contrasts
+
+## number of taxa
+ntaxa<-seq(10,100,by=5)
+
+## number of simulations
+ns<-400
+
+## simulate trees (we'll re-utilize these)
+sim_trees<-foreach(i=1:length(ntaxa))%dopar%{
+  phytools::pbtree(n=ntaxa[i],scale=1,nsim=ns)
+}
+
+## simulate data
+sim_bm<-foreach(i=1:length(ntaxa))%dopar%{
+  lapply(sim_trees[[i]],phytools::fastBM,nsim=2)
+}
+
+## create matrices for results
+pStandard<-pContrasts<-pContrastsPerm<-pRank<-
+  pSign<-tContrasts<-tContrastsPerm<-tStandard<-
+  tRank<-tSign<-matrix(nrow=ns, ncol=length(ntaxa),
+    dimnames=list(1:ns,ntaxa))
+
+## iterate over ntaxa
+for(i in 1:length(ntaxa)){
+  r0<-foreach(j=1:ns)%dopar%{
+    t<-sim_trees[[i]][[j]]
+    x<-sim_bm[[i]][[j]][,1]
+    y<-sim_bm[[i]][[j]][,2]
+    summary(lm(y~x))
+  }
+  r1<-foreach(j=1:ns)%dopar%{
+    t<-sim_trees[[i]][[j]]
+    x<-sim_bm[[i]][[j]][,1]
+    y<-sim_bm[[i]][[j]][,2]
+    picRegression(t, x, y, method="standard", 
+      sigTest="analytic")
+  }
+  r2<-foreach(j=1:ns)%dopar%{
+    t<-sim_trees[[i]][[j]]
+    x<-sim_bm[[i]][[j]][,1]
+    y<-sim_bm[[i]][[j]][,2]
+    picRegression(t, x, y, method="standard", 
+      sigTest="permutation")
+  }
+  r3<-foreach(j=1:ns)%dopar%{
+    t<-sim_trees[[i]][[j]]
+    x<-sim_bm[[i]][[j]][,1]
+    y<-sim_bm[[i]][[j]][,2]
+    picRegression(t, x, y, method="sign", 
+      sigTest="permutation")
+  }
+  r4<-foreach(j=1:ns)%dopar%{
+    t<-sim_trees[[i]][[j]]
+    x<-sim_bm[[i]][[j]][,1]
+    y<-sim_bm[[i]][[j]][,2]
+    picRegression(t, x, y, method="rank", 
+      sigTest="permutation")
+  }
+  ## populate matrices with test statistics
+  tStandard[,i]<-sapply(r0,function(x) x$coefficients[2,4])
+  tContrasts[,i]<-sapply(r1,function(x) x$testStat)
+  tContrastsPerm[,i]<-sapply(r2,function(x) x$testStat)
+  tSign[,i]<-sapply(r3,function(x) x$testStat)
+  tRank[,i]<-sapply(r4,function(x) x$testStat)
+  ## populate matrices with P-values
+  pStandard[,i]<-sapply(r0,function(x) x$coefficients[2,4])
+  pContrasts[,i]<-sapply(r1,function(x) x$pVal)
+  pContrastsPerm[,i]<-sapply(r2,function(x) x$pVal)
+  pSign[,i]<-sapply(r3,function(x) x$pVal)
+  pRank[,i]<-sapply(r4,function(x) x$pVal)
+  
+  cat(paste("Done with N = ",ntaxa[i]," ...\n",sep=""))
+}
+
+countSignif<-function(p) {
+  sum(p<0.05)/length(p)
+}
+t1Standard<-apply(pStandard, 2, countSignif)
+t1Contrasts<-apply(pContrasts, 2, countSignif)
+t1ContrastsPerm<-apply(pContrastsPerm, 2, countSignif)
+t1Sign<-apply(pSign, 2, countSignif)
+t1Rank<-apply(pRank, 2, countSignif)
+
+## second simulate under uncorrelated Ornstein-Uhlenbeck
+## for two traits with varied alpha levels
+
+## this is a test of type I error under the null 
+## for standard contrasts
+
+## levels of alpha
+alpha<-c(0.1,0.2,0.5,1,2,5,10)
+
+## simulate data
+foo<-function(phy,alpha){
+  ou<-geiger:::rescale.phylo(phy,model="OU",alpha=alpha)
+  phytools::fastBM(ou,nsim=2)
+}
+
+nn<-which(ntaxa==50)
+
+sim_ou<-foreach(i=1:length(alpha))%dopar%{
+  lapply(sim_trees[[nn]],foo,alpha=alpha[i])
+}
+
+## create matrices for results
+pStandard<-pContrasts<-pContrastsPerm<-pRank<-
+  pSign<-tContrasts<-tContrastsPerm<-tStandard<-
+  tRank<-tSign<-matrix(nrow=ns, ncol=length(alpha),
+    dimnames=list(1:ns,alpha))
+
+## iterate over alpha
+for(i in 1:length(alpha)){
+  r0<-foreach(j=1:ns)%dopar%{
+    t<-sim_trees[[nn]][[j]]
+    x<-sim_ou[[i]][[j]][,1]
+    y<-sim_ou[[i]][[j]][,2]
+    summary(lm(y~x))
+  }
+  r1<-foreach(j=1:ns)%dopar%{
+    t<-sim_trees[[nn]][[j]]
+    x<-sim_ou[[i]][[j]][,1]
+    y<-sim_ou[[i]][[j]][,2]
+    picRegression(t, x, y, method="standard", 
+      sigTest="analytic")
+  }
+  r2<-foreach(j=1:ns)%dopar%{
+    t<-sim_trees[[nn]][[j]]
+    x<-sim_ou[[i]][[j]][,1]
+    y<-sim_ou[[i]][[j]][,2]
+    picRegression(t, x, y, method="standard", 
+      sigTest="permutation")
+  }
+  r3<-foreach(j=1:ns)%dopar%{
+    t<-sim_trees[[nn]][[j]]
+    x<-sim_ou[[i]][[j]][,1]
+    y<-sim_ou[[i]][[j]][,2]
+    picRegression(t, x, y, method="sign", 
+      sigTest="permutation")
+  }
+  r4<-foreach(j=1:ns)%dopar%{
+    t<-sim_trees[[nn]][[j]]
+    x<-sim_ou[[i]][[j]][,1]
+    y<-sim_ou[[i]][[j]][,2]
+    picRegression(t, x, y, method="rank", 
+      sigTest="permutation")
+  }
+  ## populate matrices with test statistics
+  tStandard[,i]<-sapply(r0,function(x) x$coefficients[2,4])
+  tContrasts[,i]<-sapply(r1,function(x) x$testStat)
+  tContrastsPerm[,i]<-sapply(r2,function(x) x$testStat)
+  tSign[,i]<-sapply(r3,function(x) x$testStat)
+  tRank[,i]<-sapply(r4,function(x) x$testStat)
+  ## populate matrices with P-values
+  pStandard[,i]<-sapply(r0,function(x) x$coefficients[2,4])
+  pContrasts[,i]<-sapply(r1,function(x) x$pVal)
+  pContrastsPerm[,i]<-sapply(r2,function(x) x$pVal)
+  pSign[,i]<-sapply(r3,function(x) x$pVal)
+  pRank[,i]<-sapply(r4,function(x) x$pVal)
+  
+  cat(paste("Done with alpha = ",alpha[i]," ...\n",sep=""))
+}
+
+countSignif<-function(p) {
+  sum(p<0.05)/length(p)
+}
+t2Standard<-apply(pStandard, 2, countSignif)
+t2Contrasts<-apply(pContrasts, 2, countSignif)
+t2ContrastsPerm<-apply(pContrastsPerm, 2, countSignif)
+t2Sign<-apply(pSign, 2, countSignif)
+t2Rank<-apply(pRank, 2, countSignif)
+
+stopCluster(mc)
+
+## save Rdata
+save(sim_trees,ntaxa,ns,
+  t1Standard,t1Contrasts,t1ContrastsPerm,t1Rank,t1Sign,
+  alpha,
+  t2Standard,t2Contrasts,t2ContrastsPerm,t2Rank,t2Sign,
+  file="typeI-error-analysis.Rdata")
+```
+```{r Harmon-fig2, echo=FALSE, fig.width=11, fig.height=5.5, dpi=300, fig.cap="Type I error results.", out.width = "100%"}
+## load Rdata
+load("typeI-error-analysis.Rdata")
+
+## subdivide plotting area
+par(mfrow=c(1,2))
+
+## create plot panel (a)
+x<-ntaxa
+plot(x, t1Standard,  type="l", ylim=c(0, 0.6), lwd=2, 
+  xlab="number of taxa", ylab="type I error rate",
+  las=1,bty="n")
+lines(c(1, 100), c(0.05, 0.05), col="red")
+lines(x, t1Contrasts, lwd=2, col="black", lty=2)
+lines(x, t1ContrastsPerm, lwd=2, col="black", lty=3)
+lines(x, t1Rank, lwd=2, col="grey")
+lines(x, t1Sign, lwd=2, col="grey", lty=2)
+grid()
+legend("topleft", lwd=2, col=c("black", "black", "black", 
+  "grey", "grey"), legend=c("Standard", "IC", "IC Perm", 
+    "IC rank test", "IC sign test"), lty=c(1, 2,3, 1, 2))
+mtext("a) type I error rate under Brownian motion",
+  line=2,adj=0)
+
+## create plot panel (b)
+x<-alpha
+plot(x, t2Standard,  type="l", ylim=c(0, 0.6), lwd=2, 
+  xlab=expression(paste(alpha," of OU model")), 
+  ylab="type I error rate",
+  las=1,bty="n",log="x")
+lines(c(0.001, 11), c(0.05, 0.05), col="red")
+lines(x, t2Contrasts, lwd=2, col="black", lty=2)
+lines(x, t2ContrastsPerm, lwd=2, col="black", lty=3)
+lines(x, t2Rank, lwd=2, col="grey")
+lines(x, t2Sign, lwd=2, col="grey", lty=2)
+grid()
+legend("topleft", lwd=2, col=c("black", "black", "black", 
+  "grey", "grey"), legend=c("Standard", "IC", "IC Perm", 
+    "IC rank test", "IC sign test"), lty=c(1, 2,3, 1, 2))
+mtext("b) type I error rate under Ornstein-Uhlenbeck",
+  line=2,adj=0)
+```
+
+Likewise, our PRC method has only slightly less power than standard independent contrasts, and considerably more power than Ackerly's (2000) sign test, over both a range of tree sizes and character correlation values (Fig. 3a, b). The PRC test also outperforms other comparative methods when there is error in phylogenetic branch length estimation. To illustrate this, we simulated data on pure-birth phylogenetic trees (as in Figure 1) but then ran analyses after setting all branch lengths in these trees equal. Under these conditions, both PRC and the contrast sign test have appropriate type I error (CST 2.0/%, PRC 5.7/%), while type I error is elevated for independent contrasts (11.4/%). When the expected correlation between characters is 0.5, PRC again has power similar to independent contrasts (IC 74.6/%, PRC 62.9/%). This test also mimics the situation where one knows tree topology, but branch lengths are either unknown or estimated with high error.
+
+```{r, echo=FALSE}
+## clean up workspace for next analysis
+rm(list=ls()[-which(ls()%in%c("sim_trees","picRegression","ns","ntaxa"))])
+```
+```{r, echo=FALSE, eval=FALSE}
+## power analysis
+
+## set seed
+set.seed(99)
+
+## set up cluster
+ncores<-max(10,detectCores())
+mc<-makeCluster(ncores,type="PSOCK")
+registerDoParallel(cl=mc)
+
+## third simulate correlated Brownian motion
+## for two traits
+
+## this is a test of power
+
+## number of taxa
+ntaxa<-seq(10,100,by=5)
+
+## simulate data
+cor_mat<-matrix(c(1,0.5,0.5,1),2,2)
+sim_corbm<-foreach(i=1:length(ntaxa))%dopar%{
+  lapply(sim_trees[[i]],phytools::sim.corrs,vcv=cor_mat)
+}
+
+## create matrices for results
+pStandard<-pContrasts<-pContrastsPerm<-pRank<-
+  pSign<-tContrasts<-tContrastsPerm<-tStandard<-
+  tRank<-tSign<-matrix(nrow=ns, ncol=length(ntaxa),
+    dimnames=list(1:ns,ntaxa))
+
+## iterate over ntaxa
+for(i in 1:length(ntaxa)){
+  r0<-foreach(j=1:ns)%dopar%{
+    t<-sim_trees[[i]][[j]]
+    x<-sim_corbm[[i]][[j]][,1]
+    y<-sim_corbm[[i]][[j]][,2]
+    summary(lm(y~x))
+  }
+  r1<-foreach(j=1:ns)%dopar%{
+    t<-sim_trees[[i]][[j]]
+    x<-sim_corbm[[i]][[j]][,1]
+    y<-sim_corbm[[i]][[j]][,2]
+    picRegression(t, x, y, method="standard", 
+      sigTest="analytic")
+  }
+  r2<-foreach(j=1:ns)%dopar%{
+    t<-sim_trees[[i]][[j]]
+    x<-sim_corbm[[i]][[j]][,1]
+    y<-sim_corbm[[i]][[j]][,2]
+    picRegression(t, x, y, method="standard", 
+      sigTest="permutation")
+  }
+  r3<-foreach(j=1:ns)%dopar%{
+    t<-sim_trees[[i]][[j]]
+    x<-sim_corbm[[i]][[j]][,1]
+    y<-sim_corbm[[i]][[j]][,2]
+    picRegression(t, x, y, method="sign", 
+      sigTest="permutation")
+  }
+  r4<-foreach(j=1:ns)%dopar%{
+    t<-sim_trees[[i]][[j]]
+    x<-sim_corbm[[i]][[j]][,1]
+    y<-sim_corbm[[i]][[j]][,2]
+    picRegression(t, x, y, method="rank", 
+      sigTest="permutation")
+  }
+  ## populate matrices with test statistics
+  tStandard[,i]<-sapply(r0,function(x) x$coefficients[2,4])
+  tContrasts[,i]<-sapply(r1,function(x) x$testStat)
+  tContrastsPerm[,i]<-sapply(r2,function(x) x$testStat)
+  tSign[,i]<-sapply(r3,function(x) x$testStat)
+  tRank[,i]<-sapply(r4,function(x) x$testStat)
+  ## populate matrices with P-values
+  pStandard[,i]<-sapply(r0,function(x) x$coefficients[2,4])
+  pContrasts[,i]<-sapply(r1,function(x) x$pVal)
+  pContrastsPerm[,i]<-sapply(r2,function(x) x$pVal)
+  pSign[,i]<-sapply(r3,function(x) x$pVal)
+  pRank[,i]<-sapply(r4,function(x) x$pVal)
+  
+  cat(paste("Done with N = ",ntaxa[i]," ...\n",sep=""))
+}
+
+countSignif<-function(p) {
+  sum(p<0.05)/length(p)
+}
+t3Standard<-apply(pStandard, 2, countSignif)
+t3Contrasts<-apply(pContrasts, 2, countSignif)
+t3ContrastsPerm<-apply(pContrastsPerm, 2, countSignif)
+t3Sign<-apply(pSign, 2, countSignif)
+t3Rank<-apply(pRank, 2, countSignif)
+
+## third simulate correlated evolution on OU tree
+## for two traits
+
+## this is a test of power
+
+## levels of alpha
+alpha<-c(0.1,0.2,0.5,1,2,5,10)
+
+## simulate data
+cor_mat<-matrix(c(1,0.5,0.5,1),2,2)
+
+foo<-function(phy,alpha){
+  ou<-geiger:::rescale.phylo(phy,model="OU",alpha=alpha)
+  phytools::sim.corrs(ou,vcv=cor_mat)
+}
+
+nn<-which(ntaxa==50)
+
+sim_corou<-foreach(i=1:length(alpha))%dopar%{
+  lapply(sim_trees[[nn]],foo,alpha=alpha[i])
+}
+
+## create matrices for results
+pStandard<-pContrasts<-pContrastsPerm<-pRank<-
+  pSign<-tContrasts<-tContrastsPerm<-tStandard<-
+  tRank<-tSign<-matrix(nrow=ns, ncol=length(alpha),
+    dimnames=list(1:ns,alpha))
+
+## iterate over alpha
+for(i in 1:length(alpha)){
+  r0<-foreach(j=1:ns)%dopar%{
+    t<-sim_trees[[nn]][[j]]
+    x<-sim_corou[[i]][[j]][,1]
+    y<-sim_corou[[i]][[j]][,2]
+    summary(lm(y~x))
+  }
+  r1<-foreach(j=1:ns)%dopar%{
+    t<-sim_trees[[nn]][[j]]
+    x<-sim_corou[[i]][[j]][,1]
+    y<-sim_corou[[i]][[j]][,2]
+    picRegression(t, x, y, method="standard", 
+      sigTest="analytic")
+  }
+  r2<-foreach(j=1:ns)%dopar%{
+    t<-sim_trees[[nn]][[j]]
+    x<-sim_corou[[i]][[j]][,1]
+    y<-sim_corou[[i]][[j]][,2]
+    picRegression(t, x, y, method="standard", 
+      sigTest="permutation")
+  }
+  r3<-foreach(j=1:ns)%dopar%{
+    t<-sim_trees[[nn]][[j]]
+    x<-sim_corou[[i]][[j]][,1]
+    y<-sim_corou[[i]][[j]][,2]
+    picRegression(t, x, y, method="sign", 
+      sigTest="permutation")
+  }
+  r4<-foreach(j=1:ns)%dopar%{
+    t<-sim_trees[[nn]][[j]]
+    x<-sim_corou[[i]][[j]][,1]
+    y<-sim_corou[[i]][[j]][,2]
+    picRegression(t, x, y, method="rank", 
+      sigTest="permutation")
+  }
+  ## populate matrices with test statistics
+  tStandard[,i]<-sapply(r0,function(x) x$coefficients[2,4])
+  tContrasts[,i]<-sapply(r1,function(x) x$testStat)
+  tContrastsPerm[,i]<-sapply(r2,function(x) x$testStat)
+  tSign[,i]<-sapply(r3,function(x) x$testStat)
+  tRank[,i]<-sapply(r4,function(x) x$testStat)
+  ## populate matrices with P-values
+  pStandard[,i]<-sapply(r0,function(x) x$coefficients[2,4])
+  pContrasts[,i]<-sapply(r1,function(x) x$pVal)
+  pContrastsPerm[,i]<-sapply(r2,function(x) x$pVal)
+  pSign[,i]<-sapply(r3,function(x) x$pVal)
+  pRank[,i]<-sapply(r4,function(x) x$pVal)
+  
+  cat(paste("Done with alpha = ",alpha[i]," ...\n",sep=""))
+}
+
+countSignif<-function(p) {
+  sum(p<0.05)/length(p)
+}
+t4Standard<-apply(pStandard, 2, countSignif)
+t4Contrasts<-apply(pContrasts, 2, countSignif)
+t4ContrastsPerm<-apply(pContrastsPerm, 2, countSignif)
+t4Sign<-apply(pSign, 2, countSignif)
+t4Rank<-apply(pRank, 2, countSignif)
+
+## stop cluster
+stopCluster(mc)
+
+## save Rdata
+save(sim_trees,ntaxa,ns,
+  t3Standard,t3Contrasts,t3ContrastsPerm,t3Rank,t3Sign,
+  alpha,
+  t4Standard,t4Contrasts,t4ContrastsPerm,t4Rank,t4Sign,
+  file="power-analysis.Rdata")
+```
+```{r Harmon-fig3, echo=FALSE, fig.width=11, fig.height=5.5, dpi=300, fig.cap="Power analysis results.", out.width = "100%"}
+## load Rdata
+load("power-analysis.Rdata")
+
+## subdivide plotting area
+par(mfrow=c(1,2))
+
+## create panel (a) of plot
+x<-ntaxa
+plot(x, t3Standard,  type="l", ylim=c(0, 1), lwd=2, 
+  xlab="number of taxa", ylab="power to reject null",
+  las=1,bty="n")
+lines(x, t3Contrasts, lwd=2, col="black", lty=2)
+lines(x, t3ContrastsPerm, lwd=2, col="black", lty=3)
+lines(x, t3Rank, lwd=2, col="grey")
+lines(x, t3Sign, lwd=2, col="grey", lty=2)
+grid()
+legend("bottomright", lwd=2, col=c("black", "black", "black", 
+  "grey", "grey"), legend=c("Standard", "IC", "IC Perm", 
+    "IC rank test", "IC sign test"), lty=c(1, 2,3, 1, 2))
+mtext("a) power under Brownian motion with r = 0.5",
+  line=2,adj=0)
+
+## create panel (b) of plot
+x<-alpha
+plot(x, t4Standard,  type="l", ylim=c(0, 1), lwd=2, 
+  xlab=expression(paste(alpha," of OU model")), 
+  ylab="power to reject null",
+  las=1,bty="n",log="x")
+lines(x, t4Contrasts, lwd=2, col="black", lty=2)
+lines(x, t4ContrastsPerm, lwd=2, col="black", lty=3)
+lines(x, t4Rank, lwd=2, col="grey")
+lines(x, t4Sign, lwd=2, col="grey", lty=2)
+grid()
+
+legend("bottomright", lwd=2, col=c("black", "black", "black", 
+  "grey", "grey"), legend=c("Standard", "IC", "IC Perm", 
+    "IC rank test", "IC sign test"), lty=c(1, 2,3, 1, 2))
+
+mtext("b) power under Ornstein-Uhlenbeck with r = 0.5",
+  line=2,adj=0)
+```
 
 We have characterized this method as “semiparametric” because it is not truly distribution-free. One key component of the method involves calculating standardized independent contrasts, which assumes that the characters are evolving under a Brownian motion model. However, by converting these contrasts to ranks, this method greatly lessens the effects of violations of this assumption for testing correlations between characters. In fact, to preserve contrast rank order, one must assume that changes on each branch are independent, and that there is more change on longer branches in the tree than along short branches. Violations of this assumption will lead to increased type I error of this test. One example of violations that would have negative impacts on all tests described here (standard regression, independent contrasts, CST, and PST) is rate heterogeneity across the tree (O'Meara et al., 2006). For example, if evolution is faster along certain branches in the tree, nearby contrasts values and signs will be correlated, and all methods relying on their independence will exhibit inflated type I error. 
 
-Table 1 shows a summary of our results.
+Table 1 shows a summary of our results. (Should we need to include a table, I'm leaving this in as a guide for formatting it.)
 
 ```{r, echo=FALSE, results='asis'}
 aov_table<-data.frame(matrix(NA,3,5))

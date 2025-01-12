@@ -1,7 +1,11 @@
 # nonpar phytools style
 
-picRegression <- function (tree, x, y, method="standard", sigTest="permutation") 
+picRegression <- function (tree, x, y, method="standard", sigTest="permutation",
+  ...) 
 {
+  ## original version was missing nperm argument so I added it (LR)
+  if(hasArg(nperm)) nperm<-list(...)$nperm
+  else nperm<-100
   if (!inherits(tree, "phylo")) 
     stop("tree should be object of class \"phylo\".")
   
@@ -21,8 +25,8 @@ picRegression <- function (tree, x, y, method="standard", sigTest="permutation")
   }
   
   if(method=="standard") {
-    icx<-pic(x, tree)
-    icy<-pic(y, tree)
+    icx<-ape::pic(x, tree)
+    icy<-ape::pic(y, tree)
     
     if(sigTest=="analytic") {
       res<-summary(lm(icy~icx+0))
@@ -51,8 +55,8 @@ picRegression <- function (tree, x, y, method="standard", sigTest="permutation")
   }
   
   if(method=="sign") {
-    icx<-pic(x, tree)
-    icy<-pic(y, tree)
+    icx<-ape::pic(x, tree)
+    icy<-ape::pic(y, tree)
     xPos<-icx>0
     yPos<-icy>0
     testStat<-sum(xPos==yPos)
@@ -62,8 +66,8 @@ picRegression <- function (tree, x, y, method="standard", sigTest="permutation")
   }
   
   if(method=="rank") {
-    icx<-pic(x, tree)
-    icy<-pic(y, tree)
+    icx<-ape::pic(x, tree)
+    icy<-ape::pic(y, tree)
     
     dicx<-c(icx, -icx)	
     dicy<-c(icy, -icy)
@@ -94,3 +98,4 @@ picRegression <- function (tree, x, y, method="standard", sigTest="permutation")
   class(obj) <- "picRegression"
   obj
 }
+
