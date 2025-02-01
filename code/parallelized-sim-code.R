@@ -113,7 +113,7 @@ t1Rank<-apply(pRank, 2, countSignif)
 ## for standard contrasts
 
 ## levels of alpha
-alpha<-c(0.1,0.2,0.5,1,2,5,10)
+alpha<-c(0.1,0.2,0.5,1,2,5,10,20,50,100)
 
 ## simulate data
 foo<-function(phy,alpha){
@@ -220,7 +220,7 @@ plot(x, t2Standard,  type="l", ylim=c(0, 0.6), lwd=2,
   xlab=expression(paste(alpha," of OU model")), 
   ylab="type I error rate",
   las=1,bty="n",log="x")
-lines(c(0.001, 11), c(0.05, 0.05), col="red")
+lines(c(0.001, 101), c(0.05, 0.05), col="red")
 lines(x, t2Contrasts, lwd=2, col="black", lty=2)
 lines(x, t2ContrastsPerm, lwd=2, col="black", lty=3)
 lines(x, t2Rank, lwd=2, col="grey")
@@ -338,7 +338,7 @@ t3Rank<-apply(pRank, 2, countSignif)
 ## this is a test of power
 
 ## levels of alpha
-alpha<-c(0.1,0.2,0.5,1,2,5,10)
+alpha<-c(0.1,0.2,0.5,1,2,5,10,20,50,100)
 
 ## simulate data
 cor_mat<-matrix(c(1,0.5,0.5,1),2,2)
