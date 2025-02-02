@@ -15,7 +15,7 @@ affiliation:
   - code: 2
     address: Department of Biology, University of Massachusetts Boston, Boston, MA, USA
 abstract: >
-  Phylogenetic comparative methods are a broad suite of approaches for studying trait and species diversification using evolutionary trees. In spite of their substantial growth in sophistication and complexity in recent years, among the most commonly-employed phylogenetic comparative method continues to be a simple measure of the evolutionary correlation between variables, while accounting for the statistical non-independence in our data that arises from common descent. The standard parametric phylogenetic approach for measuring the evolutionary correlation between continuously-valued characters assumes a model called Brownian motion for the evolution of our traits. Here, we introduce a new semiparametric method that relaxes this assumption by testing for the evolutionary correlation between variables based on ranks, and then obtaining a null distribution on the test statistic via random permutation. We show that this approach has reasonable statistical properties: type I error close to the nominal level, and power that's similar to fully parametric methods. We conclude by comparing our new method to related approaches. 
+  Phylogenetic comparative methods are a broad suite of approaches for studying trait and species diversification using evolutionary trees. In spite of their substantial growth in sophistication and complexity in recent years, among the most commonly-employed phylogenetic comparative method continues to be a simple measure of the evolutionary correlation between variables, while accounting for the statistical non-independence in our data that arises from common descent. The standard parametric phylogenetic approach for measuring the evolutionary correlation between continuously-valued characters assumes a model called Brownian motion for the evolution of our traits. Here, we introduce a new semiparametric method that relaxes this assumption by testing for the evolutionary correlation between variables based on contrast ranks, and then obtaining a null distribution on the test statistic via random permutation. We show that this approach has reasonable statistical properties: type I error close to the nominal level, and power that's similar to fully parametric methods. We conclude by comparing our new method to related approaches. 
 header-includes: |
     \usepackage{fancyhdr}
     \pagestyle{fancy}
@@ -146,21 +146,21 @@ picRegression <- function (tree, x, y, method="standard", sigTest="permutation",
 
 Statistical phylogenetic comparative methods have become an invaluable tool in contemporary evolutionary research [@Felsenstein1985; @Revell2022-book]. This group of methodologies comprises a large and growing set of approaches for studying increasingly sophisticated evolutionary hypotheses of trait and species diversification using phylogenetic trees [reviewed in @Harvey1991; @Nunn2011-book; @OMeara2012; @Harmon2019-book; @Revell2022-book]. Nonetheless, among the most common evolutionary hypothesis studied by researchers using statistical comparative methods is the simple question of whether one trait is correlated with another -- while accounting for the non-independence of the species that that make up our data points due to their shared histories [@Felsenstein1985; reviewed in @Nunn2011-book; @Harmon2019-book; @Revell2022-book].
 
-When measuring and undertaking a hypothesis test of this nature, phylogenetic comparative methods typically assume a particular underlying model of trait evolution, such as the Brownian motion model [@Felsenstein1973a; @Felsenstein1985; @OMeara2006]. Brownian motion (also called a Wiener process) is a continuous-time stochastic diffusion process in which the expected value is constant and the variance increases as a linear function of time multiplied by the Brownian motion rate, typically denoted $\sigma^2$ [@Felsenstein1973a; @Felsenstein2004-book; @OMeara2006; @Harmon2019-book; @Revell2022-book].  In particular, under the phylogenetically independent contrasts algorithm of @Felsenstein1985, both the internal node values in the contrasts algorithm, and the variances of the (non-standardized) contrasts, are calculated assuming a Brownian evolutionary process on the tree [@Felsenstein1985; @Felsenstein2004-book; @Harmon2019-book]. Likewise, under phylogenetic generalized least squares regression [@Grafen1989; @Rohlf2001], we assume that either the data themselves or their residual errors are autocorrelated in a manner consistent with Brownian motion evolution or a closely-related process [e.g., @Pagel1999; @Garland2000; @Rohlf2001; @Revell2010]. Though there are a number of circumstances in which continuously-valued phenotypic traits might genuinely evolve via a Brownian process [e.g., @Lynch1990], violations of the Brownian model are likely be common in real data sets [@Blomberg2003; @Freckleton2006; @Hunt2006; @Estes2007; @Uyeda2011]. Brownian motion has nonetheless persisted as one of the most commonly-used trait evolution models for studying evolutionary correlations, largely due to its simplicity, tractability, and apparent robustness to deviations from model assumptions under some circumstances [e.g., @Garland1993; @Rohlf2001; @Stone2011].
+When measuring and undertaking a hypothesis test of this nature, phylogenetic comparative methods typically assume a particular underlying model of trait evolution, such as the Brownian motion model [@Felsenstein1973a; @Felsenstein1985; @OMeara2006]. Brownian motion (also called a Wiener process) is a continuous-time stochastic diffusion process in which the expected value is constant and the variance increases as a linear function of time multiplied by the Brownian motion rate, typically denoted $\sigma^2$ [@Felsenstein1973a; @Felsenstein2004-book; @OMeara2006; @Harmon2019-book; @Revell2022-book].  In particular, under the phylogenetically independent contrasts algorithm of @Felsenstein1985, both the internal node values in the contrasts algorithm, and the variances of the (non-standardized) contrasts, are calculated assuming a Brownian evolutionary process on the tree [@Felsenstein1985; @Felsenstein2004-book; @Harmon2019-book]. Likewise, under phylogenetic generalized least squares regression [@Grafen1989; @Rohlf2001], we assume that either the data themselves, or their residual errors, are autocorrelated in a manner consistent with Brownian motion evolution-- or a closely-related process [e.g., @Pagel1999; @Garland2000; @Rohlf2001; @Revell2010]. Though there are a number of circumstances in which continuously-valued phenotypic traits might genuinely evolve via a Brownian process [e.g., @Lynch1990], violations of the Brownian model are likely be common in real data sets [@Blomberg2003; @Freckleton2006; @Hunt2006; @Estes2007; @Uyeda2011]. Brownian motion has nonetheless persisted as one of the most commonly-used trait evolution models for studying evolutionary correlations, largely due to its simplicity, tractability, and apparent robustness to deviations from model assumptions under some circumstances [e.g., @Garland1993; @Rohlf2001; @Stone2011].
 
-A number of different approaches have been devised to identify violations of Brownian motion in our data while measuring evolutionary correlations, and then to account for these deviations statistically. 
+Nonetheless, a number of different approaches have been devised to identify violations of Brownian motion in our data while measuring evolutionary correlations, and then to account for these deviations statistically. 
 
-First, we can apply various diagnostic tests for independent contrasts that are sensitive to violations of the Brownian model [e.g., @Garland1992; @Blomberg2003; @Freckleton2006]. For example, if the generative model of the data is Brownian motion, then standardized independent contrasts of @Felsenstein1985 should be independently and identically distributed (i.i.d.). If, on the other hand, standardized contrasts are correlated with their expected variances (that is, the amount of evolutionary branch length that subtends each contrast), this suggests that there may be more or less evolutionary change along long branches of the tree (depending on the sign of the correlation), than would have been expected under a Brownian process [@Garland1992]. We might then attempt various transformations of the branch lengths of the tree so that our contrasts no longer violate this test [@Garland1992].
+First, we can apply various diagnostic tests for independent contrasts that are sensitive to violations of the Brownian model [e.g., @Garland1992; @Blomberg2003; @Freckleton2006]. For example, if the generative model of the data is Brownian motion, then standardized independent contrasts of @Felsenstein1985 should be independently and identically distributed (i.i.d.). If, on the other hand, standardized contrasts are correlated with their expected variances (that is, the amount of evolutionary branch length that subtends each phylogenetic contrast), this suggests that there may be either more or less evolutionary change along long branches of the phylogeny (depending on the sign of the correlation) than would have been expected under a Brownian process [@Garland1992]. We might then attempt various transformations of the branch lengths of the tree so that our contrasts no longer violate this test [@Garland1992].
 
-Another similar and closely-related diagnostic is one that's referred to as the node-height test [@Freckleton2006]. Here, we measure for a relationship between our standardized contrasts and the height above the root of the node over which each contrast was calculated [@Freckleton2006]. Once again, this correlation should be statistically indistinguishable from zero if the Brownian motion model assumptions hold for our data.
+Another similar and closely-related diagnostic is one that's referred to as the node-height test [@Freckleton2006]. Here, we measure for a relationship between our standardized contrasts and the height (above the root) of the node over which each contrast was calculated [@Freckleton2006]. Once again, this correlation should be statistically indistinguishable from zero if the Brownian motion model assumption holds for our data.
 
 Both the measures of @Garland1992 and @Freckleton2006's node-heights test can also be interpreted as measurements of model adequacy. If they fail (that is, if we reject a null hypothesis of no correlation between the standardized contrast and its variance or node height), then this suggests that our underlying assumption of Brownian motion may be invalid [@Pennell2015].
 
-Under circumstances in which Brownian motion has been rejected via a diagnostic test, we might then proceed to consider one or more of a relatively limited set of alternative trait evolution models [e.g., @Pagel1999; @Revell2010]. In particular, we may proceed to fit our correlation assuming a different evolutionary scenario that is nonetheless Gaussian, such as the Ornstein-Uhlenbeck or a speciational trait evolution models [e.g., @Hansen1997; @Martins1997]. Alternatively, we could transform the branches of the phylogenetic tree or the elements of the variance-covariance matrix derived from the tree [@Grafen1989; @Garland1992; @Pagel1999; @Revell2010]. Nevertheless, there is no general solution to the problem of evolutionary model assumption violations, and on occasion there may simply be no way to coax our data set or tree to fit the assumptions of our analysis!
+Under circumstances in which Brownian motion has been rejected via a diagnostic test, we might then proceed to consider one or more of a relatively limited set of alternative trait evolution models [e.g., @Pagel1999; @Revell2010]. In particular, we may proceed to fit our correlation assuming a different evolutionary scenario that is nonetheless Gaussian, such as the Ornstein-Uhlenbeck or a speciational trait evolution models [e.g., @Hansen1997; @Martins1997]. Alternatively, we could transform the branches of the phylogenetic tree, or the elements of the variance-covariance matrix derived from the tree [@Grafen1989; @Garland1992; @Pagel1999; @Revell2010]. Nevertheless, there is no general solution to the problem of evolutionary model assumption violations, and on occasion there may simply be no way to coax our data set or tree to fit the assumptions of our analysis!
 
-In statistics, nonparametric tests can sometimes provide robustness in cases where models are not known or provide poor fits to data [e.g., @Wasserman2006]. As comparative methods are employed to tackle a wider and wider range of problems, from genomics to cancer biology to evolutionary studies at the broadest scale, there is a growing need for just such robust approaches. Among existing comparative methods, nonparametric methods are already available for the analysis of discrete characters [e.g., @Maddison1990], and for morphometric shape data [@Adams2014]. To date, however, the only non- or semiparametric comparative method designed specifically for measuring the correlation of continuously-valued traits is Ackerly's [-@Ackerly2000] contrast sign test (CST). This test involves comparing the signs (positive or negative) of phylogenetically independent contrasts for two characters [@Ackerly2000]. If the two characters are evolving independently, then the number of pairs of contrasts with the same sign should follow a binomial distribution with probability of success $p=0.5$. The CST provides a robust alternative to fully parametric comparative methods, but is not commonly used. Its primary drawback is that this test can have very low power, in part because it relies only on the contrast signs, and discards all information about their relative magnitudes. 
+In statistics, nonparametric tests can sometimes provide robustness in cases where models are not known or provide poor fits to data [e.g., @Wasserman2006]. As comparative methods are employed to tackle a wider and wider range of problems, from genomics to cancer biology to evolutionary studies at the broadest scale, there is a growing need for precisely this kind of robust approach. Among existing comparative methods, nonparametric approaches are already available for the analysis of discrete characters [e.g., @Maddison1990], and for morphometric shape data [@Adams2014]. To date, however, the only non- or semiparametric comparative method designed specifically for measuring the correlation of continuously-valued characters is Ackerly's [-@Ackerly2000] contrast sign test (CST). This test involves comparing the signs (positive or negative) of phylogenetically independent contrasts for two characters [@Ackerly2000]. If the two characters are evolving independently, then the number of pairs of contrasts with the same sign should follow a binomial distribution with probability of success $p=0.5$. The CST provides a robust alternative to fully parametric comparative methods, but is not commonly used. Its primary drawback is that the test can have very low power-- in part because it relies only on the contrast signs, and discards all information about their relative magnitudes. 
 
-Here we describe a new semiparametric comparative method, that we call the phylogenetic rank correlation (PRC) test. This test, which is based on the correlation of ranks of independent contrasts on a phylogenetic tree, is robust under several models of trait evolution, and has power comparable to standard independent contrasts and much greater than the CST. We argue that the PRC test thus may provide a robust alternative to fully parametric methods, such as PGLS and independent contrasts, when the Brownian motion evolution model is clearly violated for our data [or their residual error, @Rohlf2001; @Revell2010].
+Here we describe a new semiparametric comparative method, that we call the phylogenetic rank correlation (PRC) test. This test, which is based on the correlation of ranks of independent contrasts on a phylogenetic tree, seems to be robust to substantial deviations from a strict assumption of Brownian motion evolution of our traits, but nonetheless has power comparable to standard independent contrasts and much greater than the CST. Consequently, we argue that the PRC test may provide a robust alternative to fully parametric methods, such as PGLS and independent contrasts, when the Brownian motion evolution model is clearly violated for our data [or their residual errors, @Rohlf2001; @Revell2010].
 
 # Description of the Method
 
@@ -168,7 +168,7 @@ The PRC test has a total of six steps (Figure 1), as follows.
 
 1. Calculate standardized independent contrasts [@Felsenstein1985] for two continuously distributed traits, $X$ and $Y$. These contrasts each consist of two numeric values (a contrast for $X$ and a contrast for $Y$), and they should number $\textbf{C}_1$, $\textbf{C}_2$, through $\textbf{C}_m$ for $m$ internal nodes in the tree (Figure 1).
 
-2. Reflect the contrasts, multiplying both the $X$ and $Y$ value of each pair of contrasts in the two traits by $-1$. The data will now include two 'copies' of each $X$, $Y$ pair of contrasts, one with the signs of each contrast reversed. Thus, for example, if contrast $\textbf{C}_1$ consists of the numeric values $[-0.6,1.9]$, we would create an additional contrast in our data set, $\textbf{C}_{m+1}$, that was equal to $[0.6,-1.9]$ (Figure 1), and then proceed to do the same for all $m$ contrasts in our tree.
+2. Reflect the contrasts, multiplying both the $X$ and $Y$ value of each pair of contrasts in the two traits by $-1$. The data will now include two 'copies' of each $X$, $Y$ pair of contrasts, one with the signs of each contrast reversed. Thus, for example, if contrast $\textbf{C}_1$ consists of the numeric values $[-0.6,1.9]$, we would create an additional contrast in our data set, $\textbf{C}_{m+1}$, that was equal to $[0.6,-1.9]$ (Figure 1), and then proceed to do the same for all $m$ contrasts in the tree.
 
 3. Create ranks independently for the numeric values of the contrasts for each variable, $X$ and $Y$ (Figure 1). In the case of tied values, we should assign the mean rank to all contrast values in the tie. 
 
@@ -178,7 +178,7 @@ The PRC test has a total of six steps (Figure 1), as follows.
 
 6. Compare the test statistic with the null distribution from permutation to obtain a P-value of the test. We calculate our P-value as $2 \times$ the fraction of permuted test-statistic values (for a two-tailed test) that are equally or more extreme than our measured value of $\rho$ (or $\tau$).
 
-```{r Harmon-fig1, echo=FALSE, fig.width=6, dpi=300, include=TRUE, fig.cap="Illustration of the method of phylogenetic rank contrasts, PRC. First, we compute raw independent contrasts in the standard. For a bifurcation tree with $N$ tips there should be $m=N-1$ such contrasts, in which $m$ is also the number of nodes in the tree. Next, we standardize the contrasts by their expected variance in the typical way following Felsenstein (1985). We duplicate all pairs of contrasts for each of our two variable but swapping the signs (i.e., rotating around $[0,0]$). Next, we convert all contrasts (and their reflections) to ranks. Finally, we calculate the test-statistic, in this case, Spearman's $\\rho$. A P-value for $\\rho$ is obtained via permutation. See main text for more details.", echo=FALSE, out.width = "100%"}
+```{r Harmon-fig1, echo=FALSE, fig.width=6, dpi=300, include=TRUE, fig.cap="Illustration of the method of phylogenetic rank contrasts, PRC. First, we compute raw independent contrasts in the standard way. For a bifurcating tree with $N$ tips there should be $m=N-1$ such contrasts, in which $m$ is also the number of nodes in the tree. Next, we standardize the contrasts by their expected variance under Brownian motion following Felsenstein (1985). We duplicate all pairs of contrasts for each of our two variable, but swap the signs (i.e., rotating around the origin, $[0,0]$). Next, we convert all contrasts (and their reflections) to ranks. Finally, we calculate the test-statistic, in this case, Spearman's $\\rho$. A P-value for $\\rho$ is obtained via permutation of the contrasts for either \\emph{X} or \\emph{Y} (it doesn't matter which). See main text for more details.", echo=FALSE, out.width = "100%"}
 knitr::include_graphics("Harmon-fig1.pdf")
 ```
 
@@ -190,23 +190,23 @@ In step (2.), reflecting the contrasts is critical because the direction of any 
 
 Finally, in step (4.), any nonparametric test statistic could be used for this test [see, e.g., @Wasserman2006]. For simplicity, we have chosen to use Spearman's rank correlation (Spearman's $\rho$), which is simply the Pearson product-moment correlation of the ranks of the two variables [@Spearman1904]. Kendall's $\tau$ [@Kendall1938] is another viable option that could be substituted with no other changes to the described methodology. 
 
-We provide a worked example of the calculations involved in this test in Figure 1. Software to carry out this test, written in the R statistical computing language [@RTeam2024], will be made publicly available as part of the popular *geiger* R package [@Harmon2007; @Pennell2014].
+We provide a worked example of the calculations involved in this test in Figure 1. Software to carry out the PRC test, written in the R statistical computing language [@RTeam2024], will be made publicly available as part of the popular *geiger* R phylogenetics package [@Harmon2007; @Pennell2014].
 
 # Statistical properties of the method
 
-To explore the statistical properties of our semiparametric evolutionary correlation test, the PRC, we measured type I error and power of the test under a range of circumstances. Then we compared both to the same measures for both non-phylogenetic (i.e., OLS or 'standard' regression) and related phylogenetic comparative methods [independent contrasts, contrasts with a statistical distribution obtained via permutation, and the contrasts sign test of @Ackerly2000].
+To explore the statistical properties of our semiparametric evolutionary correlation test, the PRC, we measured type I error and power of the test under a range of circumstances. Then we compared both to the same measures for both non-phylogenetic (i.e., OLS or 'standard' non-phylogenetic correlation) and related phylogenetic comparative methods [independent contrasts, contrasts with a statistical distribution obtained via permutation, and the contrasts sign test of @Ackerly2000].
 
 To measure type I error we started by simulating data for $X$ and $Y$ under Brownian motion evolution and with no evolutionary correlation between the two traits. For this simulation, we first began by generating 1,000 pure-birth (i.e., Yule) phylogenetic trees containing from $N=10$ to 100 taxa on ten taxon intervals (i.e., $N=10$, 20, 30, etc.), an exercise that resulted in a total of $9 \times 1,000 = 9,000$ simulated trees. These trees were rescaled to have a total height of 1.0, and each of $X$ and $Y$ were simulated (independently, as they are uncorrelated) with a Brownian motion rate of $\sigma^2 = 1.0$. 
 
-Using this set of 9,000 trees and simulated datasets for $X$ and $Y$, we then proceeded to fit a standard (OLS) regression ("Standard"), a contrasts regression ("IC"), a contrasts regression but in which a P-value for hypothesis testing was obtained via random permutation ("IC Perm"), the contrasts sign test ("CST"), and our phylogenetic rank correlation ("PRC"). We decided to include a permutation test based on phylogenetically independent contrasts to ensure that our measured type I error and power for the PRC were due to the use of a rank correlation, rather than for having substituted a permutation distribution for the parametric distribution typically used in phylogenetic correlation with independent contrasts. For each analysis we computed a P-value, and then we estimated the type I error rate as the fraction of P-values from each set of simulation conditions and analysis with values equal or smaller than 5\%. 
+Using this set of 9,000 trees and simulated datasets for $X$ and $Y$, we then proceeded to fit a standard (OLS) regression ("Standard"), a contrasts regression ("IC"), a contrasts regression but in which a P-value for hypothesis testing was obtained via random permutation ("IC Perm"), the contrasts sign test ("CST"), and our phylogenetic rank correlation ("PRC"). We decided to include a permutation test based on phylogenetically independent contrasts to ensure that our measured type I error and power for the PRC were due to the use of a rank correlation, rather than for having substituted a permutation distribution for the parametric distribution typically used in phylogenetic correlation with independent contrasts. For each analysis we computed a P-value, and then we estimated the type I error rate as the fraction of P-values from each set of simulation conditions and analysis with values equal to or smaller than 5\%. 
 
-Results from this analysis are given in Figure 2a. Consistent with expectations [e.g., @Revell2010], we found high type I error of OLS regression for phylogenetic data simulated under Brownian motion (Figure 2a), at a rate that increased with increasing numbers of taxa, $N$ (Figure 2a). By contrast, when the assumption of Brownian motion evolution held true, all phylogenetic analyses had type I error rates close to the nominal level of $\alpha = 0.05$ (Figure 2a).
+Results from this analysis are given in Figure 2a. Consistent with expectations [e.g., @Revell2010], we found high type I error of standard, non-phylogenetic correlation for phylogenetic data simulated under Brownian motion (Figure 2a), at a rate that increased with increasing numbers of taxa, $N$ (Figure 2a). By contrast, when the assumption of Brownian motion evolution held true, all phylogenetic analyses had type I error rates close to the nominal level of $\alpha = 0.05$ (Figure 2a).
 
-We next proceeded to simulated uncorrelated data for $X$ and $Y$, but this time under an Ornstein-Uhlenbeck, rather than Browian, process. The Ornstein-Uhlenbeck process is a stochastic process similar to Brownian motion, but in which there exists a tendency to revert towards some central value of the trait [@Hansen1997; @Butler2004]. (As such Ornstein-Uhlenbeck is sometimes referred to as Brownian motion with a 'rubber-band,' in which we can imagine an elastic rubber bands that tends to pull the stochastic process towards its tether-point.) The strength of this tendency is determined by the model parameter $\alpha$ (not to be confused with our nominal type I error rate, also denoted as $\alpha$). Higher values of $\alpha$ correspond to a greater tendency to revert towards the central value. The parameter $\alpha$ can also be understood in terms of "phylogenetic half-life" [@Hansen2008], $\ln(2)/\alpha$, which measures have the time a trait is expected to evolve from its ancestral value to the optimum of the Ornstein-Uhlenbeck process. Conversely, a value of $\alpha = 0$ (and consequently a phylogenetic half-life of $\ln(2)/\alpha = \infty$) corresponds to Brownian motion evolutionary change. 
+We next proceeded to simulated uncorrelated data for $X$ and $Y$, but this time under an Ornstein-Uhlenbeck, rather than Browian, process. The Ornstein-Uhlenbeck process is a stochastic process similar to Brownian motion, but in which there exists a tendency to revert towards some central value of the trait [@Hansen1997; @Butler2004]. (As such Ornstein-Uhlenbeck is sometimes referred to as Brownian motion with a 'rubber-band,' in which we can imagine an elastic rubber bands that tends to pull the stochastic process towards its tether-point.) The strength of this tendency is determined by the model parameter $\alpha$ (not to be confused with our nominal type I error rate, also denoted as $\alpha$). Higher values of $\alpha$ correspond to a greater tendency to revert towards the central value. The parameter $\alpha$ can also be understood in terms of "phylogenetic half-life" [@Hansen2008], $\ln(2)/\alpha$, which is equal to the average time (under the process) that a trait should require to evolve from its ancestral value halfway to the optimum of the Ornstein-Uhlenbeck process. Conversely, a value of $\alpha = 0$ (and consequently a phylogenetic half-life of $\ln(2)/\alpha = \infty$) corresponds to Brownian motion evolutionary change. 
 
-Using only the set of 1,000 simulated trees with $N=50$ from our prior analysis, we simulated data for $X$ and $Y$ under an Ornstein-Uhlenbeck model with values of $\alpha = 0.1$, 0.2, 0.5, 1, 2, 5, 10, 20, 50, and 100. This resulted in a total of $7 \times 400 = 2,800$ simulated datasets. We then repeated the same non-phylogenetic and phylogenetic correlation analyses as were described in the previous section.
+Using only the set of 1,000 simulated trees with $N=50$ from our prior analysis, we simulated data for $X$ and $Y$ under an Ornstein-Uhlenbeck model with values of $\alpha = 0.1$, 0.2, 0.5, 1, 2, 5, 10, 20, 50, and 100. This resulted in a total of $10 \times 1,000 = 10,000$ additional simulated datasets. We then repeated the same non-phylogenetic and phylogenetic correlation analyses as were described in the prior section.
 
-Results for this test are shown in Figure 2b. In general, we found that type I error of the non-phylogenetic (i.e., standard) regression was highest for low $\alpha$ and decreased with increasing $\alpha$ (Figure 2b). This is fairly unsurprising because low $\alpha$ corresponds closely to Brownian motion in which a standard correlation is unreliable; while (by contrast) very high $\alpha$ tends to reduce the autocorrelation of species data which, in the limit as $\alpha \rightarrow \infty$, will lose all phylogenetic autocorrelation altogether and thus satisfy the assumptions of standard OLS. Conversely, type I error of all phylogenetic methods was close to the nominal level of $\alpha = 0.05$ for the lowest values of (Ornstein-Uhlenbeck) $\alpha$, but increased for higher $\alpha$. This increase, however, was smallest for the CST and PRC (of this article), and highest for standard independent contrasts and permutation-based contrasts regression (Figure 2b).
+Results for this test are shown in Figure 2b. In general, we found that type I error of the non-phylogenetic (i.e., standard) correlation was highest for low $\alpha$ and decreased with increasing $\alpha$ (Figure 2b). This is fairly unsurprising because low $\alpha$ corresponds closely to Brownian motion in which a standard correlation is unreliable; while (by contrast) very high $\alpha$ tends to reduce the autocorrelation of species data which, in the limit as $\alpha \rightarrow \infty$, will lose all phylogenetic autocorrelation altogether and thus satisfy the assumptions of standard OLS. Conversely, type I error of all phylogenetic methods was close to the nominal level of $\alpha = 0.05$ for the lowest values of (Ornstein-Uhlenbeck) $\alpha$, but increased for higher $\alpha$. This increase, however, was smallest for the CST and PRC (of this article), and highest for standard independent contrasts and permutation-based contrasts regression (Figure 2b). In particular, type I error at the very *highest* level of $\alpha$ was actually slightly below 5\% for the CST, 6.3\% for the PRC, and around 30\% for contrasts regression.
 
 Taken together, these results indicate that our semiparametric contrasts rank correlation method (PRC) has type I error under Brownian motion that is virtually identical to existing parametric and non-parametric phylogenetic evolutionary correlation tests (Figure 2a). Our results also show, however, that the phylogenetic rank correlation test can have much lower type I error than parametric methods when the strict assumption of Brownian motion evolution is violated by our data (Figure 2b).
 
@@ -376,7 +376,7 @@ stopCluster(mc)
 ## save workspace
 save.image(file="typeI-error-analysis.Rdata")
 ```
-```{r Harmon-fig2, echo=FALSE, fig.width=11, fig.height=5.5, dpi=300, fig.cap="Results of the analysis of type I error. (a) Type I error of both a standard (non-phylogenetic) correlation, and various phylogenetic correlations, when data for \\emph{X} and \\emph{Y} were simulated under a Brownian motion model, for various total number of taxa, \\emph{N}. (b) Type I error for standard and phylogenetic correlation tests when data were simulated under an Ornstein-Uhlenbeck process, for various values of $\\alpha$.", out.width = "100%"}
+```{r Harmon-fig2, echo=FALSE, fig.width=11, fig.height=5.5, dpi=300, fig.cap="Results of the analysis of type I error. (a) Type I error of both a standard (non-phylogenetic) correlation, and various phylogenetic correlations, when data for \\emph{X} and \\emph{Y} were simulated under a Brownian motion model, for various total number of taxa, \\emph{N}. (b) Type I error for standard and phylogenetic correlation tests when data were simulated under an Ornstein-Uhlenbeck process, for various values of $\\alpha$. Legend labels are as follows: \"Standard,\" non-phylogenetic correlation; \"IC,\" correlation test based on contrasts; \"IC Perm,\" same as \"IC,\" but in which a null distribution of the test statistic was obtained via permutation of the contrasts; \"PRC,\" phylogenetic rank correlation (of this article); and \"CST,\" contrasts sign test of Ackerly (2000). See main text for additional details.", out.width = "100%"}
 ## load Rdata
 load("typeI-error-analysis.Rdata")
 
@@ -396,7 +396,7 @@ lines(x, t1Sign, lwd=2, col="grey", lty=2)
 grid()
 legend("topleft", lwd=2, col=c("black", "black", "black", 
   "grey", "grey"), legend=c("Standard", "IC", "IC Perm", 
-    "CST", "PRC"), lty=c(1, 2,3, 1, 2), bg="white")
+    "PRC" , "CST"), lty=c(1, 2,3, 1, 2), bg="white")
 mtext("a) type I error rate under Brownian motion",
   line=2,adj=0)
 
@@ -414,12 +414,12 @@ lines(x, t2Sign, lwd=2, col="grey", lty=2)
 grid()
 legend("topright", lwd=2, col=c("black", "black", "black", 
   "grey", "grey"), legend=c("Standard", "IC", "IC Perm", 
-    "CST", "PRC"), lty=c(1, 2,3, 1, 2), bg="white")
+    "PRC" , "CST"), lty=c(1, 2,3, 1, 2), bg="white")
 mtext("b) type I error rate under Ornstein-Uhlenbeck",
   line=2,adj=0)
 ```
 
-In addition to measuring type I error, we also wanted to test the power of the PRC method to detect a statistically significant correlation where one exists. To this end, we simulated data for $X$ and $Y$ using exactly the same simulation conditions as for Figure 2, described above, but in which our data were simulated with an evolutionary correlation between the traits of $r = 0.5$, instead of in an uncorrelated fashion. Power for each simulation condition and method was scored as the fraction of P-values than were equal to or fell below 5\%. The results for this analysis are given in Figure 3.
+In addition to measuring type I error, we also wanted to test the power of the PRC method to detect a statistically significant correlation where one exists. To this end, we commenced by simulating data for $X$ and $Y$ using exactly the same conditions as for Figure 2, described above, but using an evolutionary correlation between the traits of $r = 0.5$. Since the simulations in every other way paralleled our type I error test, the total number of data sets generated for this analysis was 10,000 $+$ 9,000 = 19,000. Power for each simulation condition and method was scored as the fraction of P-values than were equal to or fell below 5\%. The results for this analysis are given in Figure 3.
 
 When $X$ and $Y$ were simulated under Brownian motion, we found that standard contrasts (IC) and contrasts with a statistical test via permutation (IC Perm) had the highest power; however, these methods were followed closely by our semiparametric PRC (Figure 3a). Ackerly's [-@Ackerly2000] CST method had the lowest power of all methods (Figure 3a). When our correlated data for $X$ and $Y$ were simulated under Ornstein-Uhlenbeck a similar pattern repeats in which standard contrasts (IC), a permutation test using contrasts (IC Perm), standard (non-phylogenetic) correlation, and our phylogenetic rank correlation (PRC) have the highest power -- much higher than the power of the CST by Ackerly (2000; Figure 3b).
 
@@ -578,7 +578,7 @@ stopCluster(mc)
 ## save workspace
 save.image(file="power-analysis.Rdata")
 ```
-```{r Harmon-fig3, echo=FALSE, fig.width=11, fig.height=5.5, dpi=300, fig.cap="Results of the analysis of power for a true underlying evolution correlation between \\emph{X} and \\emph{Y} of $r = 0.5$. (a) Power of both a standard (non-phylogenetic) correlation, and various phylogenetic correlations, when data for \\emph{X} and \\emph{Y} were simulated under a Brownian motion model, for various total number of taxa, \\emph{N}. (b) Power of standard and phylogenetic correlation tests when data were simulated under an Ornstein-Uhlenbeck process, for various values of $\\alpha$.", out.width = "100%"}
+```{r Harmon-fig3, echo=FALSE, fig.width=11, fig.height=5.5, dpi=300, fig.cap="Results of the analysis of power for a true underlying evolution correlation between \\emph{X} and \\emph{Y} of $r = 0.5$. (a) Power of both a standard (non-phylogenetic) correlation, and various phylogenetic correlations, when data for \\emph{X} and \\emph{Y} were simulated under a Brownian motion model, for various total number of taxa, \\emph{N}. (b) Power of standard and phylogenetic correlation tests when data were simulated under an Ornstein-Uhlenbeck process, for various values of $\\alpha$. Legend as in Figure 2.", out.width = "100%"}
 ## load Rdata
 load("power-analysis.Rdata")
 
@@ -597,7 +597,7 @@ lines(x, t3Sign, lwd=2, col="grey", lty=2)
 grid()
 legend("bottomright", lwd=2, col=c("black", "black", "black", 
   "grey", "grey"), legend=c("Standard", "IC", "IC Perm", 
-    "CST", "PRC"), lty=c(1, 2,3, 1, 2), bg="white")
+    "PRC" , "CST"), lty=c(1, 2,3, 1, 2), bg="white")
 mtext("a) power under Brownian motion with r = 0.5",
   line=2,adj=0)
 
@@ -615,17 +615,230 @@ grid()
 
 legend("bottomright", lwd=2, col=c("black", "black", "black", 
   "grey", "grey"), legend=c("Standard", "IC", "IC Perm", 
-    "CST", "PRC"), lty=c(1, 2,3, 1, 2), bg="white")
+    "PRC" , "CST"), lty=c(1, 2,3, 1, 2), bg="white")
 
 mtext("b) power under Ornstein-Uhlenbeck with r = 0.5",
   line=2,adj=0)
 ```
 
+Lastly, to explore the influence of effect size on statistical power, we used the same set of 1,000 simulated trees employed for the previous analysis in which the number of taxa $N = 50$. We first simulated correlated Brownian motion evolution on each set of trees while varying the evolutionary correlation coefficient, $r$, between $r = 0$ and 1.0 on the interval 0.1 ($r = 0$, 0.1, 0.2, and so on). We next repeated the same simulation, but using Ornstein-Uhlenbeck with $\alpha = 10$ for simulation. In total, we thus generated a total of 11 $\times$ 1,000 $\times$ 2 = 22,000 simulated data sets for this analysis.
+
+For each simulation condition, we measured power as the fraction of statistical tests from each simulation condition rejecting the null hypothesis of no correlation (although, of course, this was just a re-measurement of the type I error for $r = 0$). Results for these analyses are shown in Figure 4. In general, when data were simulated under Brownian motion, our PRC test had highly similar power to contrasts regression (Figure 4a). The CRT had much lower power over all simulation conditions (Figure 4a). Standard, non-phylogenetic correlation had high "power" for low values of $r$; however, this actually reflects the much higher type I error of non-phylogenetic methods that we showed in Figure 2a. By contrast, for higher values of $r$ the power of non-phylogenetic analyses falls substantially below both the contrasts method and our PRC. Likewise, for data simulated under an Ornstein-Uhlenbeck model with $\alpha = 10$, the PRC method of this article exhibited power across all effect sizes that was substantively higher than the CRT and comparable to both standard (non-phylogenetic) and contrasts-based correlation methods (Figure 4b). Consistent with our analysis of Figure 2b, however, the PRC also showed *lower* "power" (reflecting its lower type I error, and thus a desirable attribute of the method) for the lowest $r$ values of $r = 0$ and 0.1 (Figure 4b).
+
+```{r, eval=FALSE, echo=FALSE}
+## effect size
+
+## load workspace
+load(file="typeI-error-analysis.Rdata")
+rm(list=ls()[-which(ls()%in%c("sim_trees","picRegression","ns"))])
+
+ns<-length(sim_trees[[1]])
+
+## set seed
+set.seed(99)
+
+## set up cluster
+ncores<-max(10,detectCores())
+mc<-makeCluster(ncores,type="PSOCK")
+registerDoParallel(cl=mc)
+
+## number of taxa
+ntaxa<-seq(10,100,by=10)
+
+## correlations
+r_sim<-seq(0,1,by=0.1)
+
+## set trees to use
+nn<-which(ntaxa==50)
+
+## BM function
+foo<-function(phy,r){
+  cor_mat<-matrix(c(1,r,r,1),2,2)
+  if(r<1) return(phytools::sim.corrs(phy,vcv=cor_mat))
+  else {
+    tmp<-phytools::fastBM(phy)
+    return(cbind(tmp,tmp))
+  }
+}
+
+## simulate under BM
+sim_corbm<-foreach(i=1:length(r_sim))%dopar%{
+  lapply(sim_trees[[nn]],foo,r=r_sim[i])
+}
+
+## OU function
+foo<-function(phy,r,alpha=10){
+  cor_mat<-matrix(c(1,r,r,1),2,2)
+  ou<-geiger:::rescale.phylo(phy,model="OU",alpha=alpha)
+  if(r<1) return(phytools::sim.corrs(ou,vcv=cor_mat))
+  else {
+    tmp<-phytools::fastBM(ou)
+    return(cbind(tmp,tmp))
+  }
+}
+
+## simulate under OU
+sim_corou<-foreach(i=1:length(r_sim))%dopar%{
+  lapply(sim_trees[[nn]],foo,r=r_sim[i])
+}
+
+## create matrices for results
+pStandard<-pContrasts<-pContrastsPerm<-pRank<-
+  pSign<-tContrasts<-tContrastsPerm<-tStandard<-
+  tRank<-tSign<-matrix(nrow=ns, ncol=length(r_sim),
+    dimnames=list(1:ns,r_sim))
+
+## first BM
+
+## iterate over r_sim
+for(i in 1:length(r_sim)){
+  r0<-r1<-r2<-r3<-r4<-
+    vector(mode="list",length=ns)
+  for(j in 1:ns){
+    t<-sim_trees[[nn]][[j]]
+    x<-sim_corbm[[i]][[j]][,1]
+    y<-sim_corbm[[i]][[j]][,2]
+    r0[[j]]<-summary(lm(y~x))
+    r1[[j]]<-picRegression(t, x, y, method="standard", 
+      sigTest="analytic")
+    r2[[j]]<-picRegression(t, x, y, method="standard", 
+      sigTest="permutation")
+    r3[[j]]<-picRegression(t, x, y, method="sign", 
+      sigTest="permutation")
+    r4[[j]]<-picRegression(t, x, y, method="rank", 
+      sigTest="permutation")
+  }
+  ## populate matrices with test statistics
+  tStandard[,i]<-sapply(r0,function(x) x$coefficients[2,4])
+  tContrasts[,i]<-sapply(r1,function(x) x$testStat)
+  tContrastsPerm[,i]<-sapply(r2,function(x) x$testStat)
+  tSign[,i]<-sapply(r3,function(x) x$testStat)
+  tRank[,i]<-sapply(r4,function(x) x$testStat)
+  ## populate matrices with P-values
+  pStandard[,i]<-sapply(r0,function(x) x$coefficients[2,4])
+  pContrasts[,i]<-sapply(r1,function(x) x$pVal)
+  pContrastsPerm[,i]<-sapply(r2,function(x) x$pVal)
+  pSign[,i]<-sapply(r3,function(x) x$pVal)
+  pRank[,i]<-sapply(r4,function(x) x$pVal)
+  ## give feedback
+  cat(paste("Done with r = ",r_sim[i]," ...\n",sep=""))
+}
+
+countSignif<-function(p) {
+  sum(p<0.05)/length(p)
+}
+t5Standard<-apply(pStandard, 2, countSignif)
+t5Contrasts<-apply(pContrasts, 2, countSignif)
+t5ContrastsPerm<-apply(pContrastsPerm, 2, countSignif)
+t5Sign<-apply(pSign, 2, countSignif)
+t5Rank<-apply(pRank, 2, countSignif)
+
+## now OU
+
+## create matrices for results
+pStandard<-pContrasts<-pContrastsPerm<-pRank<-
+  pSign<-tContrasts<-tContrastsPerm<-tStandard<-
+  tRank<-tSign<-matrix(nrow=ns, ncol=length(r_sim),
+    dimnames=list(1:ns,r_sim))
+
+## iterate over r_sim
+for(i in 1:length(r_sim)){
+  r0<-r1<-r2<-r3<-r4<-
+    vector(mode="list",length=ns)
+  for(j in 1:ns){
+    t<-sim_trees[[nn]][[j]]
+    x<-sim_corou[[i]][[j]][,1]
+    y<-sim_corou[[i]][[j]][,2]
+    r0[[j]]<-summary(lm(y~x))
+    r1[[j]]<-picRegression(t, x, y, method="standard", 
+      sigTest="analytic")
+    r2[[j]]<-picRegression(t, x, y, method="standard", 
+      sigTest="permutation")
+    r3[[j]]<-picRegression(t, x, y, method="sign", 
+      sigTest="permutation")
+    r4[[j]]<-picRegression(t, x, y, method="rank", 
+      sigTest="permutation")
+  }
+  ## populate matrices with test statistics
+  tStandard[,i]<-sapply(r0,function(x) x$coefficients[2,4])
+  tContrasts[,i]<-sapply(r1,function(x) x$testStat)
+  tContrastsPerm[,i]<-sapply(r2,function(x) x$testStat)
+  tSign[,i]<-sapply(r3,function(x) x$testStat)
+  tRank[,i]<-sapply(r4,function(x) x$testStat)
+  ## populate matrices with P-values
+  pStandard[,i]<-sapply(r0,function(x) x$coefficients[2,4])
+  pContrasts[,i]<-sapply(r1,function(x) x$pVal)
+  pContrastsPerm[,i]<-sapply(r2,function(x) x$pVal)
+  pSign[,i]<-sapply(r3,function(x) x$pVal)
+  pRank[,i]<-sapply(r4,function(x) x$pVal)
+  ## give feedback
+  cat(paste("Done with r = ",r_sim[i]," ...\n",sep=""))
+}
+
+countSignif<-function(p) {
+  sum(p<0.05)/length(p)
+}
+t6Standard<-apply(pStandard, 2, countSignif)
+t6Contrasts<-apply(pContrasts, 2, countSignif)
+t6ContrastsPerm<-apply(pContrastsPerm, 2, countSignif)
+t6Sign<-apply(pSign, 2, countSignif)
+t6Rank<-apply(pRank, 2, countSignif)
+
+## stop cluster
+stopCluster(mc)
+
+## save workspace
+save.image(file="effect-size.Rdata")
+```
+```{r Harmon-fig4, echo=FALSE, fig.width=11, fig.height=5.5, dpi=300, fig.cap="Results of an analysis of power, for various evolutionary correlations between \\emph{X} and \\emph{Y}. (a) Power of both a standard (non-phylogenetic) correlation, and various phylogenetic correlations, when data for \\emph{X} and \\emph{Y} were simulated under a Brownian motion model, for evolutionary correlations, \\emph{r}. (b) Power of standard and phylogenetic correlation tests when data were simulated under an Ornstein-Uhlenbeck process with $\\alpha = 10$, for various values of the evolutionary correlation, \\emph{r}. Legend is as in Figures 2 and 3.", out.width = "100%"}
+## load Rdata
+load("effect-size.Rdata")
+
+## subdivide plotting area
+par(mfrow=c(1,2))
+
+## create panel (a) of plot
+x<-r_sim
+plot(x, t5Standard,  type="l", xlim=c(0,1), 
+  ylim=c(0, 1), lwd=2, 
+  xlab="generating correlation (r)", 
+  ylab="power to reject null",
+  las=1,bty="n")
+lines(x, t5Contrasts, lwd=2, col="black", lty=2)
+lines(x, t5ContrastsPerm, lwd=2, col="black", lty=3)
+lines(x, t5Rank, lwd=2, col="grey")
+lines(x, t5Sign, lwd=2, col="grey", lty=2)
+grid()
+legend("bottomright", lwd=2, col=c("black", "black", "black", 
+  "grey", "grey"), legend=c("Standard", "IC", "IC Perm", 
+    "PRC" , "CST"), lty=c(1, 2, 3, 1, 2))
+mtext("a) power under Brownian motion with various r",
+  line=2,adj=0)
+
+## create panel (b) of plot
+x<-r_sim
+plot(x, t6Standard,  type="l", xlim=c(0,1), 
+  ylim=c(0, 1), lwd=2, 
+  xlab="generating correlation (r)", 
+  ylab="power to reject null",
+  las=1,bty="n")
+lines(x, t6Contrasts, lwd=2, col="black", lty=2)
+lines(x, t6ContrastsPerm, lwd=2, col="black", lty=3)
+lines(x, t6Rank, lwd=2, col="grey")
+lines(x, t6Sign, lwd=2, col="grey", lty=2)
+grid()
+legend("bottomright", lwd=2, col=c("black", "black", "black", 
+  "grey", "grey"), legend=c("Standard", "IC", "IC Perm", 
+    "PRC" , "CST"), lty=c(1, 2, 3, 1, 2))
+mtext("b) power under OU with various r",
+  line=2,adj=0)
+```
+
 # Discussion
 
-Phylogenetic comparative methods have become an indispensable tool of evolutionary research [reviewed in @Harmon2019-book; @Revell2022-book], and are increasingly employed across a wide variety of different research fields, from community ecology, to cancer biology, to infectious disease epidemiology [e.g., @Peterson2021; @Gao2022; @Magalis2024]. Even as they grow in complexity and sophistication, a simple test of the evolutionary correlation of two variables (while accounting for statistical non-independence arising from common descent) remains among the most popular phylogenetic comparative analyses. Typical methods for measuring the evolutionary correlation between traits, however, rely on an assumption of Brownian motion evolution of the variables or their residual error [@Felsenstein1985; @Garland1992b].
+Phylogenetic comparative methods have become an indispensable tool of evolutionary research [reviewed in @OMeara2012; @Harmon2019-book; @Revell2022-book], and are increasingly employed across a wide variety of different research fields, from community ecology, to cancer biology, to infectious disease epidemiology [e.g., @Peterson2021; @Gao2022; @Magalis2024]. Even as they grow in complexity and sophistication, a simple test of the evolutionary correlation of two variables (while accounting for statistical non-independence arising from common descent) remains among the most popular phylogenetic comparative analyses. Typical methods for measuring the evolutionary correlation between traits, however, rely on an assumption of Brownian motion evolution of the variables or their residual error [@Felsenstein1985; @Garland1992b].
 
-In this contribution, we introduce a new semiparametric phylogenetic rank correlation (PRC) test that seeks to relax this assumption. We have characterized this method as “semiparametric” because it is not truly distribution-free. Indeed, the method begins via the calculation of standardized independent contrasts (see Figure 1). Standardization is undertaken by dividing each raw contrast by its expected variance, a step that implicitly assumes our traits have evolved under a Brownian process [@Felsenstein1985]! Nonetheless, we assert, and the results of our simulation analyses show, that by converting these contrasts to ranks, the PRC method substantially lessens the effects of violations of this assumption for testing correlations between characters (Figures 2, 3). This is probably because by transforming the standardized contrasts into ranks, our assumption of Brownian evolution effectively changes into the much weaker assumption that longer branches of the tree should contain more evolution of the trait (on average) than do shorter branches. Though this is likely to be true across a much broader swathe of evolutionary processes than is strict Brownian motion evolution, it's not difficult to envision circumstances in which this assumption (too) is violated. Indeed, we would predict that strong heterogeneity in the rate of evolution [e.g., @OMeara2006] will lead to elevated type I error of the PRC, just as it would to all of the other phylogenetic methods explored in this article. In a case were substantial heterogeneity of the rate of evolution is thought to exist, we would recommend a method designed to explicitly account for this variation [e.g., Revell2009; Caetano2018].
+In this contribution, we introduce a new semiparametric phylogenetic rank correlation (PRC) test that seeks to relax this assumption. We have characterized this method as “semiparametric” because it is not truly distribution-free. Indeed, the method begins via the calculation of standardized independent contrasts (see Figure 1). Standardization is undertaken by dividing each raw contrast by its expected variance, a step that implicitly assumes our traits have evolved under a Brownian process [@Felsenstein1985]! Nonetheless, we assert, and the results of our simulation analyses show, that by converting these contrasts to ranks, the PRC method substantially lessens the effects of violations of this assumption for testing correlations between characters (Figures 2, 3, 4). This is probably because by transforming the standardized contrasts into ranks, our assumption of Brownian evolution effectively changes into the much weaker assumption that longer branches of the tree should contain more evolution of the trait (on average) than do shorter branches. Though this is likely to be true across a much broader swathe of evolutionary processes than is strict Brownian motion evolution, it's not difficult to envision circumstances in which this assumption (too) is violated. Indeed, we would predict that strong heterogeneity in the rate of evolution [e.g., @OMeara2006] will lead to elevated type I error of the PRC, just as it would to all of the other phylogenetic methods explored in this article. In a case were substantial heterogeneity of the rate of evolution is thought to exist, we would recommend a method designed to explicitly account for this variation [e.g., @Revell2009; @Caetano2018].
 
 # Conclusions 
 
@@ -637,6 +850,6 @@ All analyses of this article were undertaken in R [@RTeam2024], using the contri
 
 # Acknowledgments
 
-We thank J. J. Kolbe, J. B. Losos, D. Schluter, R. E. Glor, B. Banbury, T. Hagey, C. Brock, and H. Alamillo for providing helpful feedback on this paper.
+We thank J. J. Kolbe, J. B. Losos, D. Schluter, R. E. Glor, B. Banbury, T. Hagey, C. Brock, and H. Alamillo for providing helpful feedback on earlier versions of this project.
 
 # Literature Cited

@@ -393,3 +393,210 @@ stopCluster(mc)
 ## save workspace
 save.image(file="power-analysis.Rdata")
 
+rm(list=ls()[-which(ls()%in%c("sim_trees","picRegression","ns"))])
+
+########################################################
+
+## effect size
+
+## load workspace
+load(file="typeI-error-analysis.Rdata")
+rm(list=ls()[-which(ls()%in%c("sim_trees","picRegression","ns"))])
+
+ns<-length(sim_trees[[1]])
+
+## set seed
+set.seed(99)
+
+## set up cluster
+ncores<-max(10,detectCores())
+mc<-makeCluster(ncores,type="PSOCK")
+registerDoParallel(cl=mc)
+
+## number of taxa
+ntaxa<-seq(10,100,by=10)
+
+## correlations
+r_sim<-seq(0,1,by=0.1)
+
+## set trees to use
+nn<-which(ntaxa==50)
+
+## BM function
+foo<-function(phy,r){
+  cor_mat<-matrix(c(1,r,r,1),2,2)
+  if(r<1) return(phytools::sim.corrs(phy,vcv=cor_mat))
+  else {
+    tmp<-phytools::fastBM(phy)
+    return(cbind(tmp,tmp))
+  }
+}
+
+## simulate under BM
+sim_corbm<-foreach(i=1:length(r_sim))%dopar%{
+  lapply(sim_trees[[nn]],foo,r=r_sim[i])
+}
+
+## OU function
+foo<-function(phy,r,alpha=10){
+  cor_mat<-matrix(c(1,r,r,1),2,2)
+  ou<-geiger:::rescale.phylo(phy,model="OU",alpha=alpha)
+  if(r<1) return(phytools::sim.corrs(ou,vcv=cor_mat))
+  else {
+    tmp<-phytools::fastBM(ou)
+    return(cbind(tmp,tmp))
+  }
+}
+
+## simulate under OU
+sim_corou<-foreach(i=1:length(r_sim))%dopar%{
+  lapply(sim_trees[[nn]],foo,r=r_sim[i])
+}
+
+## create matrices for results
+pStandard<-pContrasts<-pContrastsPerm<-pRank<-
+  pSign<-tContrasts<-tContrastsPerm<-tStandard<-
+  tRank<-tSign<-matrix(nrow=ns, ncol=length(r_sim),
+    dimnames=list(1:ns,r_sim))
+
+## first BM
+
+## iterate over r_sim
+for(i in 1:length(r_sim)){
+  r0<-r1<-r2<-r3<-r4<-
+    vector(mode="list",length=ns)
+  for(j in 1:ns){
+    t<-sim_trees[[nn]][[j]]
+    x<-sim_corbm[[i]][[j]][,1]
+    y<-sim_corbm[[i]][[j]][,2]
+    r0[[j]]<-summary(lm(y~x))
+    r1[[j]]<-picRegression(t, x, y, method="standard", 
+      sigTest="analytic")
+    r2[[j]]<-picRegression(t, x, y, method="standard", 
+      sigTest="permutation")
+    r3[[j]]<-picRegression(t, x, y, method="sign", 
+      sigTest="permutation")
+    r4[[j]]<-picRegression(t, x, y, method="rank", 
+      sigTest="permutation")
+  }
+  ## populate matrices with test statistics
+  tStandard[,i]<-sapply(r0,function(x) x$coefficients[2,4])
+  tContrasts[,i]<-sapply(r1,function(x) x$testStat)
+  tContrastsPerm[,i]<-sapply(r2,function(x) x$testStat)
+  tSign[,i]<-sapply(r3,function(x) x$testStat)
+  tRank[,i]<-sapply(r4,function(x) x$testStat)
+  ## populate matrices with P-values
+  pStandard[,i]<-sapply(r0,function(x) x$coefficients[2,4])
+  pContrasts[,i]<-sapply(r1,function(x) x$pVal)
+  pContrastsPerm[,i]<-sapply(r2,function(x) x$pVal)
+  pSign[,i]<-sapply(r3,function(x) x$pVal)
+  pRank[,i]<-sapply(r4,function(x) x$pVal)
+  ## give feedback
+  cat(paste("Done with r = ",r_sim[i]," ...\n",sep=""))
+}
+
+countSignif<-function(p) {
+  sum(p<0.05)/length(p)
+}
+t5Standard<-apply(pStandard, 2, countSignif)
+t5Contrasts<-apply(pContrasts, 2, countSignif)
+t5ContrastsPerm<-apply(pContrastsPerm, 2, countSignif)
+t5Sign<-apply(pSign, 2, countSignif)
+t5Rank<-apply(pRank, 2, countSignif)
+
+## now OU
+
+## create matrices for results
+pStandard<-pContrasts<-pContrastsPerm<-pRank<-
+  pSign<-tContrasts<-tContrastsPerm<-tStandard<-
+  tRank<-tSign<-matrix(nrow=ns, ncol=length(r_sim),
+    dimnames=list(1:ns,r_sim))
+
+## iterate over r_sim
+for(i in 1:length(r_sim)){
+  r0<-r1<-r2<-r3<-r4<-
+    vector(mode="list",length=ns)
+  for(j in 1:ns){
+    t<-sim_trees[[nn]][[j]]
+    x<-sim_corou[[i]][[j]][,1]
+    y<-sim_corou[[i]][[j]][,2]
+    r0[[j]]<-summary(lm(y~x))
+    r1[[j]]<-picRegression(t, x, y, method="standard", 
+      sigTest="analytic")
+    r2[[j]]<-picRegression(t, x, y, method="standard", 
+      sigTest="permutation")
+    r3[[j]]<-picRegression(t, x, y, method="sign", 
+      sigTest="permutation")
+    r4[[j]]<-picRegression(t, x, y, method="rank", 
+      sigTest="permutation")
+  }
+  ## populate matrices with test statistics
+  tStandard[,i]<-sapply(r0,function(x) x$coefficients[2,4])
+  tContrasts[,i]<-sapply(r1,function(x) x$testStat)
+  tContrastsPerm[,i]<-sapply(r2,function(x) x$testStat)
+  tSign[,i]<-sapply(r3,function(x) x$testStat)
+  tRank[,i]<-sapply(r4,function(x) x$testStat)
+  ## populate matrices with P-values
+  pStandard[,i]<-sapply(r0,function(x) x$coefficients[2,4])
+  pContrasts[,i]<-sapply(r1,function(x) x$pVal)
+  pContrastsPerm[,i]<-sapply(r2,function(x) x$pVal)
+  pSign[,i]<-sapply(r3,function(x) x$pVal)
+  pRank[,i]<-sapply(r4,function(x) x$pVal)
+  ## give feedback
+  cat(paste("Done with r = ",r_sim[i]," ...\n",sep=""))
+}
+
+countSignif<-function(p) {
+  sum(p<0.05)/length(p)
+}
+t6Standard<-apply(pStandard, 2, countSignif)
+t6Contrasts<-apply(pContrasts, 2, countSignif)
+t6ContrastsPerm<-apply(pContrastsPerm, 2, countSignif)
+t6Sign<-apply(pSign, 2, countSignif)
+t6Rank<-apply(pRank, 2, countSignif)
+
+
+## subdivide plotting area
+par(mfrow=c(1,2))
+
+## create panel (a) of plot
+x<-r_sim
+plot(x, t5Standard,  type="l", xlim=c(0,1), 
+  ylim=c(0, 1), lwd=2, 
+  xlab="r", ylab="power to reject null",
+  las=1,bty="n")
+lines(x, t5Contrasts, lwd=2, col="black", lty=2)
+lines(x, t5ContrastsPerm, lwd=2, col="black", lty=3)
+lines(x, t5Rank, lwd=2, col="grey")
+lines(x, t5Sign, lwd=2, col="grey", lty=2)
+grid()
+legend("bottomright", lwd=2, col=c("black", "black", "black", 
+  "grey", "grey"), legend=c("Standard", "IC", "IC Perm", 
+    "IC rank test", "IC sign test"), lty=c(1, 2,3, 1, 2))
+mtext("a) power under Brownian motion with various r",
+  line=2,adj=0)
+
+## create panel (b) of plot
+x<-r_sim
+plot(x, t6Standard,  type="l", xlim=c(0,1), 
+  ylim=c(0, 1), lwd=2, 
+  xlab="r", ylab="power to reject null",
+  las=1,bty="n")
+lines(x, t6Contrasts, lwd=2, col="black", lty=2)
+lines(x, t6ContrastsPerm, lwd=2, col="black", lty=3)
+lines(x, t6Rank, lwd=2, col="grey")
+lines(x, t6Sign, lwd=2, col="grey", lty=2)
+grid()
+legend("bottomright", lwd=2, col=c("black", "black", "black", 
+  "grey", "grey"), legend=c("Standard", "IC", "IC Perm", 
+    "IC rank test", "IC sign test"), lty=c(1, 2,3, 1, 2))
+mtext("b) power under OU with various r",
+  line=2,adj=0)
+
+## stop cluster
+stopCluster(mc)
+
+## save workspace
+save.image(file="effect-size.Rdata")
+
+
