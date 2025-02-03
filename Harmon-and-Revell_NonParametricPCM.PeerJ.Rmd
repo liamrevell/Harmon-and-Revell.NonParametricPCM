@@ -376,7 +376,7 @@ stopCluster(mc)
 ## save workspace
 save.image(file="typeI-error-analysis.Rdata")
 ```
-```{r Harmon-fig2, echo=FALSE, fig.width=11, fig.height=5.5, dpi=300, fig.cap="Results of the analysis of type I error. (a) Type I error of both a standard (non-phylogenetic) correlation, and various phylogenetic correlations, when data for \\emph{X} and \\emph{Y} were simulated under a Brownian motion model, for various total number of taxa, \\emph{N}. (b) Type I error for standard and phylogenetic correlation tests when data were simulated under an Ornstein-Uhlenbeck process, for various values of $\\alpha$. Legend labels are as follows: \"Standard,\" non-phylogenetic correlation; \"IC,\" correlation test based on contrasts; \"IC Perm,\" same as \"IC,\" but in which a null distribution of the test statistic was obtained via permutation of the contrasts; \"PRC,\" phylogenetic rank correlation (of this article); and \"CST,\" contrasts sign test of Ackerly (2000). See main text for additional details.", out.width = "100%"}
+```{r Harmon-fig2, echo=FALSE, fig.width=11, fig.height=5.5, dpi=300, fig.cap="Results of the analysis of type I error. (a) Type I error of both a standard (non-phylogenetic) correlation, and various phylogenetic correlations, when data for \\emph{X} and \\emph{Y} were simulated under a Brownian motion model, for various total number of taxa, \\emph{N}. (b) Type I error for standard and phylogenetic correlation tests when data were simulated under an Ornstein-Uhlenbeck process, for various values of $\\alpha$. Legend labels are as follows: ``Standard,\" non-phylogenetic correlation; ``IC,\" correlation test based on contrasts; ``IC Perm,\" same as ``IC,\" but in which a null distribution of the test statistic was obtained via permutation of the contrasts; ``PRC,\" phylogenetic rank correlation (of this article); and ``CST,\" contrasts sign test of Ackerly (2000). See main text for additional details.", out.width = "100%"}
 ## load Rdata
 load("typeI-error-analysis.Rdata")
 
@@ -598,7 +598,8 @@ grid()
 legend("bottomright", lwd=2, col=c("black", "black", "black", 
   "grey", "grey"), legend=c("Standard", "IC", "IC Perm", 
     "PRC" , "CST"), lty=c(1, 2,3, 1, 2), bg="white")
-mtext("a) power under Brownian motion with r = 0.5",
+mtext(
+  expression("a) power under Brownian motion with"~italic("r")~"= 0.5"),
   line=2,adj=0)
 
 ## create panel (b) of plot
@@ -612,12 +613,11 @@ lines(x, t4ContrastsPerm, lwd=2, col="black", lty=3)
 lines(x, t4Rank, lwd=2, col="grey")
 lines(x, t4Sign, lwd=2, col="grey", lty=2)
 grid()
-
 legend("bottomright", lwd=2, col=c("black", "black", "black", 
   "grey", "grey"), legend=c("Standard", "IC", "IC Perm", 
     "PRC" , "CST"), lty=c(1, 2,3, 1, 2), bg="white")
-
-mtext("b) power under Ornstein-Uhlenbeck with r = 0.5",
+mtext(
+  expression("b) power under Ornstein-Uhlenbeck with"~italic("r")~"= 0.5"),
   line=2,adj=0)
 ```
 
@@ -801,7 +801,8 @@ par(mfrow=c(1,2))
 x<-r_sim
 plot(x, t5Standard,  type="l", xlim=c(0,1), 
   ylim=c(0, 1), lwd=2, 
-  xlab="generating correlation (r)", 
+  xlab=expression(paste(
+    "generating correlation (",italic(r),")",sep="")), 
   ylab="power to reject null",
   las=1,bty="n")
 lines(x, t5Contrasts, lwd=2, col="black", lty=2)
@@ -812,14 +813,16 @@ grid()
 legend("bottomright", lwd=2, col=c("black", "black", "black", 
   "grey", "grey"), legend=c("Standard", "IC", "IC Perm", 
     "PRC" , "CST"), lty=c(1, 2, 3, 1, 2))
-mtext("a) power under Brownian motion with various r",
+mtext(
+  expression("a) power under Brownian motion with various"~italic(r)),
   line=2,adj=0)
 
 ## create panel (b) of plot
 x<-r_sim
 plot(x, t6Standard,  type="l", xlim=c(0,1), 
   ylim=c(0, 1), lwd=2, 
-  xlab="generating correlation (r)", 
+  xlab=expression(paste(
+    "generating correlation (",italic(r),")",sep="")), 
   ylab="power to reject null",
   las=1,bty="n")
 lines(x, t6Contrasts, lwd=2, col="black", lty=2)
@@ -830,7 +833,8 @@ grid()
 legend("bottomright", lwd=2, col=c("black", "black", "black", 
   "grey", "grey"), legend=c("Standard", "IC", "IC Perm", 
     "PRC" , "CST"), lty=c(1, 2, 3, 1, 2))
-mtext("b) power under OU with various r",
+mtext(
+  expression("b) power under Ornstein-Uhlenbeck with various"~italic(r)),
   line=2,adj=0)
 ```
 
