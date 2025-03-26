@@ -849,7 +849,7 @@ Phylogenetic comparative methods are often employed to measure the correlation b
 
 # Code and data availability
 
-All analyses of this article were undertaken in R [@RTeam2024], using the contributed R packages *ape* [@Paradis2019], *geiger* [@Pennell2014], and *phytools* [@Revell2024]. Parallelization of simulations was accomplished using the *foreach* package [@Microsoft2022-b]. Manuscript drafts of the article were written in Rmarkdown [@Xie2018; @Xie2022; @Allaire2023], and developed with the help of both *bookdown* [@Xie2016; @Xie2023] and the posit Rstudio IDE [@Rstudio2020]. All data and markdown code necessary to exactly rebuild the submitted version of this article (including its analyses and figures) can be found at [https://github.com/liamrevell/Revell-and-Harmon.NonParametricPCM](https://github.com/liamrevell/Revell-and-Harmon.NonParametricPCM).
+All analyses of this article were undertaken in R [@RTeam2024], using the contributed R packages *ape* [@Paradis2019], *geiger* [@Pennell2014], and *phytools* [@Revell2024]. Parallelization of simulations was accomplished using the *foreach* package [@Microsoft2022-b]. Manuscript drafts of the article were written in Rmarkdown [@Xie2018; @Xie2022; @Allaire2023], and developed with the help of both *bookdown* [@Xie2016; @Xie2023] and the posit Rstudio IDE [@Rstudio2020]. All data and markdown code necessary to exactly rebuild the submitted version of this article (including its analyses and figures) can be found at [https://github.com/liamrevell/Harmon-and-Revell.NonParametricPCM](https://github.com/liamrevell/Revell-and-Harmon.NonParametricPCM).
 
 # Acknowledgments
 
