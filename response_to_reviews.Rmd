@@ -23,102 +23,143 @@ We appreciate the feedback on our work, and thank you for your time.
 ## Reviewer: Samuel Church
 ### Basic reporting
 
-This article, which describes a "semi-parametric" approach for testing the evolutionary correlation between continuous characters, is of high value to the evolutionary biology community. It is well-written and thoroughly cited, and the approach they present is a pleasantly straightforward and creative solution to one of the most persistent problems in comparative methods: our reliance on Brownian Motion models that we know often don't fit our data well.
+>*This article, which describes a "semi-parametric" approach for testing the evolutionary correlation between continuous characters, is of high value to the evolutionary biology community. It is well-written and thoroughly cited, and the approach they present is a pleasantly straightforward and creative solution to one of the most persistent problems in comparative methods: our reliance on Brownian Motion models that we know often don't fit our data well.*
 
->*Thank you for this kind description*
+>*Experimental design*
+>*The tests of statistical properties they performed are convincing in demonstrating that this approach improves upon existing methods. Specifically, through simulations they demonstrate that their phylogenetic rank approach (PRC) has a lower error rate than contrasts under certain circumstances, and higher power than another approach described by Ackerly. Their descriptions of methods are clear; I was able to understand through the figure and steps how the rank test works.*
 
-Experimental design
-The tests of statistical properties they performed are convincing in demonstrating that this approach improves upon existing methods. Specifically, through simulations they demonstrate that their phylogenetic rank approach (PRC) has a lower error rate than contrasts under certain circumstances, and higher power than another approach described by Ackerly. Their descriptions of methods are clear; I was able to understand through the figure and steps how the rank test works.
+>*Validity of the findings*
+>*Their conclusions seem valid, and the code is made available through a git repository. As far as I can tell, the authors have not yet released this as part of a package, but state that the plan is to include the test as part of R::Geiger, which sounds great.*
 
-Validity of the findings
-Their conclusions seem valid, and the code is made available through a git repository. As far as I can tell, the authors have not yet released this as part of a package, but state that the plan is to include the test as part of R::Geiger, which sounds great.
+Thank you for this kind description. Yes we will include this in R::Geiger in the new version, which should be coming out within the year.
 
-Additional comments
-I have only minor suggestions for how the manuscript could be improved. These largely focus on making the description of their approach even more accessible to a wider audience of PCM users.
 
-[1] The authors mention PGLS briefly, to state that it is a fully parametric approach and equivalent to PIC. In thinking of a standard user of PCMs that might not have the mathematical context, I would suggest that the authors expand on this point so that it is clear how their new method compares to PGLS.
+>*Additional comments*
+>*I have only minor suggestions for how the manuscript could be improved. These largely focus on making the description of their approach even more accessible to a wider audience of PCM users.*
 
-Specifically, I suggest they expand on how having a semi-parametric approach might provide a more flexible solution than adding more and more parameters to a regression model. For example, a reader familiar with PGLS might look at the error rate of PIC in Fig 2b and consider that the solution is to implement PGLS using an OU model of covariation, etc.
+>*[1] The authors mention PGLS briefly, to state that it is a fully parametric approach and equivalent to PIC. In thinking of a standard user of PCMs that might not have the mathematical context, I would suggest that the authors expand on this point so that it is clear how their new method compares to PGLS.*
 
-[2] At line 88, the authors mention some other non-parametric methods "for the analysis of discrete traits (e.g., Maddison 1990), and for morphometric shape data (Adams 2014)". I think it would be appropriate to briefly compare these methods to what is presented here, with the goal of building a cohesive set of non- or semi-parametric approaches for all types of trait data.
+>*Specifically, I suggest they expand on how having a semi-parametric approach might provide a more flexible solution than adding more and more parameters to a regression model. For example, a reader familiar with PGLS might look at the error rate of PIC in Fig 2b and consider that the solution is to implement PGLS using an OU model of covariation, etc.*
 
-In the same vein, the authors mention on line 137 "as long as variance among species tends to increase through time (see Estes and Arnold 2007).". I think it could be helpful for the authors to explain directly how they consider their approach to build on what is described in the Estes and Arnold citation.
+XXX
 
-[3] The authors state that on line 81 that "Nevertheless, there is no general solution to the problem of evolutionary model assumption violations". I agree there is not yet a general solution, but as they state in their conclusions, their PRC method also probably can't solve every problem either. I think their second statement "there may simply be no way to coax our data set or tree to fit the assumptions of our analysis!" is the stronger point, I would suggest removing the statement about general solutions.
+>*[2] At line 88, the authors mention some other non-parametric methods "for the analysis of discrete traits (e.g., Maddison 1990), and for morphometric shape data (Adams 2014)". I think it would be appropriate to briefly compare these methods to what is presented here, with the goal of building a cohesive set of non- or semi-parametric approaches for all types of trait data.*
 
-[4] I was trying to think of continuous data that might create trouble for the PRC method. What came to mind were count data (restricted to integers, can't be below 0, e.g. petal number), though I recognize these are not necessarily continuous. At high values these behave more like continuous data, but at low numbers you are likely to get a lot of tied ranks in the PRC method. Maybe its out of scope of this paper, but I think it would be helpful if the authors could comment on what properties of continuous data might be more or less appropriate for this method - do they need to follow a normal distribution, should they be transformed, is the method more or less robust to violations of normality than contrasts?
+XXX
+
+>*In the same vein, the authors mention on line 137 "as long as variance among species tends to increase through time (see Estes and Arnold 2007).". I think it could be helpful for the authors to explain directly how they consider their approach to build on what is described in the Estes and Arnold citation.*
+
+XXX
+
+>*[3] The authors state that on line 81 that "Nevertheless, there is no general solution to the problem of evolutionary model assumption violations". I agree there is not yet a general solution, but as they state in their conclusions, their PRC method also probably can't solve every problem either. I think their second statement "there may simply be no way to coax our data set or tree to fit the assumptions of our analysis!" is the stronger point, I would suggest removing the statement about general solutions.*
+
+XXX
+
+>*[4] I was trying to think of continuous data that might create trouble for the PRC method. What came to mind were count data (restricted to integers, can't be below 0, e.g. petal number), though I recognize these are not necessarily continuous. At high values these behave more like continuous data, but at low numbers you are likely to get a lot of tied ranks in the PRC method. Maybe its out of scope of this paper, but I think it would be helpful if the authors could comment on what properties of continuous data might be more or less appropriate for this method - do they need to follow a normal distribution, should they be transformed, is the method more or less robust to violations of normality than contrasts?*
+
+XXX
 
 ## Reviewer 2
-Basic reporting
-This is a nice contribution from the two leaders of the field. They have been contributing to PCMs extensively in the past and I like this contribution too, especially it is implemented in an R package and also the method was validated via a thorough simulation study. Here are a few things they can improve:
 
-At present, all figure legends are embedded within the figures themselves and lack sufficient detail. Each legend should be fully self-contained, explaining:
-- What does each axis represent (including units)?
-- All symbols, line types, and colours (e.g., which curve is “IC Perm” vs. “PRC”).
-- Sample sizes (number of taxa, number of permutations).
-- Abbreviations (e.g., define “IC,” “CST,” “OU” on first use).
-- Key methodological steps or parameters if they differ across panels (e.g., alpha values in OU simulations).
+>*Basic reporting*
+>*This is a nice contribution from the two leaders of the field. They have been contributing to PCMs extensively in the past and I like this contribution too, especially it is implemented in an R package and also the method was validated via a thorough simulation study. Here are a few things they can improve:*
 
-Ensuring readers can interpret every panel without referring back to the text will greatly improve.
+>*At present, all figure legends are embedded within the figures themselves and lack sufficient detail. Each legend should be fully self-contained, explaining:*
+>*- What does each axis represent (including units)?*
+>*- All symbols, line types, and colours (e.g., which curve is “IC Perm” vs. “PRC”).*
+>*- Sample sizes (number of taxa, number of permutations).*
+>*- Abbreviations (e.g., define “IC,” “CST,” “OU” on first use).*
+>*- Key methodological steps or parameters if they differ across panels (e.g., alpha values in OU simulations).*
+>*Ensuring readers can interpret every panel without referring back to the text will greatly improve.*
 
-Minor Comments
-1. Figures 1–4: Rewrite legends so they can stand alone (see above). Also, I do not understand what you mean by "Contrast sign test statistics w = 2" in Figure 1.
-2. Abbreviations: Expand all abbreviations on first use within each legend (e.g., “CST = contrast sign test”).
-3. Permutation details: State the number of permutations (e.g., 999 or 9999) directly in the captions for Figures 2 and 3.
-4. Parameter definitions: In captions for OU results, clearly define alpha (e.g., alpha = strength of pull toward the optimum).
-5. Legend formatting: Use consistent terminology (e.g., “Standard” vs. “OLS”) between text and figure legends.
+XXX
 
-Experimental design
-A simulation design is excellent
+>*Minor Comments*
+>*1. Figures 1–4: Rewrite legends so they can stand alone (see above). Also, I do not understand what you mean by "Contrast sign test statistics w = 2" in Figure 1.*
 
-Validity of the findings
-Great
+XXX
 
-Additional comments
-None
+>*2. Abbreviations: Expand all abbreviations on first use within each legend (e.g., “CST = contrast sign test”).*
+
+XXX
+
+>*3. Permutation details: State the number of permutations (e.g., 999 or 9999) directly in the captions for Figures 2 and 3.*
+
+XXX
+
+>*4. Parameter definitions: In captions for OU results, clearly define alpha (e.g., alpha = strength of pull toward the optimum).*
+
+XXX
+
+>*5. Legend formatting: Use consistent terminology (e.g., “Standard” vs. “OLS”) between text and figure legends.*
+
+XXX
+
+>*Experimental design*
+>*A simulation design is excellent*
+
+>*Validity of the findings*
+>*Great*
+
+>*Additional comments*
+>*None*
 
 ## Reviewer: Diego Sasso Porto
-Basic reporting
-- Clear, unambiguous, and technically correct English (as far as I can tell).
+>*Basic reporting*
+>*- Clear, unambiguous, and technically correct English (as far as I can tell).*
 
-- Sufficient background knowledge and context provided. Suitable literature references provided. I would suggest maybe adding a few mentions to other approaches for assessing correlations between pairs of discrete traits as well.
+>*- Sufficient background knowledge and context provided. Suitable literature references provided. I would suggest maybe adding a few mentions to other approaches for assessing correlations between pairs of discrete traits as well.*
 
-- The authors joined some of the “standard sections” (i.e., Materials & Methods and Results) as “Description of the method” and “Statistical properties of the method”. The particular structure is not an issue for me. Nonetheless, some readers might not easily find all the information needed because results/methods are mixed together.
+XXX
 
-- All figures are relevant, with sufficient resolution, and appropriately described. Are the x-axes in Figures 2b and 3b in logarithmic scale? If so, please add to the caption.
+>*- The authors joined some of the “standard sections” (i.e., Materials & Methods and Results) as “Description of the method” and “Statistical properties of the method”. The particular structure is not an issue for me. Nonetheless, some readers might not easily find all the information needed because results/methods are mixed together.*
 
-- All code and data are available through the authors’ GitHub repository.
+We prefer the current organization, but could consider changes upon request from the editor.
 
-Experimental design
-- The study constitute an original primary research contribution.
+>*- All figures are relevant, with sufficient resolution, and appropriately described. Are the x-axes in Figures 2b and 3b in logarithmic scale? If so, please add to the caption.*
 
-- It has a well-defined, relevant, and meaningful research question in the field of evolutionary biology.
+XXX
 
-- The investigation was performed rigorously and to a high technical standard and in conformity with the standards in the field of evolutionary biology.
+>*- All code and data are available through the authors’ GitHub repository.*
 
-- Overall, methods are clearly described and detailed information is available through R scripts thus allowing all the analyses to be replicated. Nonetheless, I would suggest adding some of the details to the main text of the manuscript as well. For example, the specific functions that were used for each simulation since some early career evolutionary biologists or undergraduate students in general might not be familiar with all the functions from the different R packages used.
+>*Experimental design*
+>*- The study constitute an original primary research contribution.*
 
-Validity of the findings
-- All findings seem to be valid. In the discussion section, the authors provide some claims (L.262-269) that would benefit from additional information/support (e.g., citations and/or empirical demonstrations/simulations).
+>*- It has a well-defined, relevant, and meaningful research question in the field of evolutionary biology.*
 
-- The authors describe, implement, and validate their new analytical approach; they also compare its statistical properties with other similar previous approaches.
+>*- The investigation was performed rigorously and to a high technical standard and in conformity with the standards in the field of evolutionary biology.*
 
-- The underlying data seems to be robust, statistically sound, and controlled; its available through the authors’ GitHub repository.
+>*- Overall, methods are clearly described and detailed information is available through R scripts thus allowing all the analyses to be replicated. Nonetheless, I would suggest adding some of the details to the main text of the manuscript as well. For example, the specific functions that were used for each simulation since some early career evolutionary biologists or undergraduate students in general might not be familiar with all the functions from the different R packages used.*
 
-- Conclusions are well-stated and seem mostly justifiable based on the main findings.
+XXX
 
-Additional comments
-Dear authors and editors,
+>*Validity of the findings*
+>*- All findings seem to be valid. In the discussion section, the authors provide some claims (L.262-269) that would benefit from additional information/support (e.g., citations and/or empirical demonstrations/simulations).*
 
-I went through the manuscript text and found no obvious critical issues. The manuscript is well-written, clear, and concise. The proposed permutation approach to assess correlations between pairs of continuous traits constitutes a simple but relevant methodological advance and much-welcomed addition to the PCM toolkit of evolutionary biologists. Please, you can find below a couple of general comments and questions that I hope can help the manuscript to better appeal to a broader readership and early career evolutionary biologists.
+XXX
 
-Cheers,
-Diego
+>*- The authors describe, implement, and validate their new analytical approach; they also compare its statistical properties with other similar previous approaches.*
 
-General comments:
+>*- The underlying data seems to be robust, statistically sound, and controlled; its available through the authors’ GitHub repository.*
 
-(1) The authors clearly show that the PRC approach has comparable type I error rates (their Figure 2) to other phylogeny-aware approaches (e.g., IC-perm) when data is simulated under a BM or OU process (OU alpha within the range between 0.1 and ~2.0) or even better than such approaches (OU alpha greater than ~2.0). The authors also demonstrate that their approach has similar power to detect true correlations both under BM and OU (their Figure 3). After validating their approach, however, I was expecting that the authors would then proceed to apply the PRC approach to some use case with a real dataset. I am saying this because I think many readers, particularly early career evolutionary biologists, would like to see a pragmatic demonstration. For example, by applying the PRC approach instead of the IC-perm approach to an empirical dataset, would someone be able to reach a different conclusion on a study about the correlated evolution of some trait of interest? It could be either, (i) an example of a previously detected trait correlation now being dismissed because of the lower rate of type I error when using the PRC; or (ii) trait correlation now being detected because of the increased power of PRC. Something like these, but employing real data and with real consequences to evolutionary interpretations.
+>*- Conclusions are well-stated and seem mostly justifiable based on the main findings.*
 
-(2) I remember reading a discussion some time ago about the best approach to shuffle PIC data when performing permutation tests with comparative data (Adams and Collyer, 2015; https://doi.org/10.1111/evo.12596). Although that discussion was done in a different context, I think it might be relevant to consider in the present manuscript. In the author’s opinion, would the results still be the same if instead of shuffling the data after calculating the standardized contrasts the shuffling was done at the stage of raw data? For example, would the author’s statements in the discussion (L.262-269) still be valid?
+>*Additional comments*
+>*Dear authors and editors,*
+
+>*I went through the manuscript text and found no obvious critical issues. The manuscript is well-written, clear, and concise. The proposed permutation approach to assess correlations between pairs of continuous traits constitutes a simple but relevant methodological advance and much-welcomed addition to the PCM toolkit of evolutionary biologists. Please, you can find below a couple of general comments and questions that I hope can help the manuscript to better appeal to a broader readership and early career evolutionary biologists.*
+
+>*Cheers,*
+>*Diego*
+
+>*General comments:*
+
+>*(1) The authors clearly show that the PRC approach has comparable type I error rates (their Figure 2) to other phylogeny-aware approaches (e.g., IC-perm) when data is simulated under a BM or OU process (OU alpha within the range between 0.1 and ~2.0) or even better than such approaches (OU alpha greater than ~2.0). The authors also demonstrate that their approach has similar power to detect true correlations both under BM and OU (their Figure 3). After validating their approach, however, I was expecting that the authors would then proceed to apply the PRC approach to some use case with a real dataset. I am saying this because I think many readers, particularly early career evolutionary biologists, would like to see a pragmatic demonstration. For example, by applying the PRC approach instead of the IC-perm approach to an empirical dataset, would someone be able to reach a different conclusion on a study about the correlated evolution of some trait of interest? It could be either, (i) an example of a previously detected trait correlation now being dismissed because of the lower rate of type I error when using the PRC; or (ii) trait correlation now being detected because of the increased power of PRC. Something like these, but employing real data and with real consequences to evolutionary interpretations.*
+
+XXX
+
+>*(2) I remember reading a discussion some time ago about the best approach to shuffle PIC data when performing permutation tests with comparative data (Adams and Collyer, 2015; https://doi.org/10.1111/evo.12596). Although that discussion was done in a different context, I think it might be relevant to consider in the present manuscript. In the author’s opinion, would the results still be the same if instead of shuffling the data after calculating the standardized contrasts the shuffling was done at the stage of raw data? For example, would the author’s statements in the discussion (L.262-269) still be valid?*
+
+XXX
 
 
