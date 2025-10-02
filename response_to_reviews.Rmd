@@ -41,19 +41,19 @@ Thank you for this kind description. Yes we will include this in R::Geiger in th
 
 >*Specifically, I suggest they expand on how having a semi-parametric approach might provide a more flexible solution than adding more and more parameters to a regression model. For example, a reader familiar with PGLS might look at the error rate of PIC in Fig 2b and consider that the solution is to implement PGLS using an OU model of covariation, etc.*
 
-XXX
+We agree, and now include an expanded discussion of PGLS in our discussion. We explicitly comment on the use of PGLS with OU.
 
 >*[2] At line 88, the authors mention some other non-parametric methods "for the analysis of discrete traits (e.g., Maddison 1990), and for morphometric shape data (Adams 2014)". I think it would be appropriate to briefly compare these methods to what is presented here, with the goal of building a cohesive set of non- or semi-parametric approaches for all types of trait data.*
 
-XXX
+We have added a more detailed description of both the concentrated change test (Maddison 1990) and Adams D-PGLS to the introduction.
 
 >*In the same vein, the authors mention on line 137 "as long as variance among species tends to increase through time (see Estes and Arnold 2007).". I think it could be helpful for the authors to explain directly how they consider their approach to build on what is described in the Estes and Arnold citation.*
 
-XXX
+We have added text here: *This assumption is compatible with a broad range of evolutionary scenarios, as long as variance among species tends to increase through time. Some models, especially those involving constant stabilizing selection, will result in variance across species that eventually reaches an equilibrium that no longer depends on time. Under those scenarios, rank-based methods might start to fail (see Estes and Arnold 2007 for a general discussion of stabilizing versus diversifying models].*
 
 >*[3] The authors state that on line 81 that "Nevertheless, there is no general solution to the problem of evolutionary model assumption violations". I agree there is not yet a general solution, but as they state in their conclusions, their PRC method also probably can't solve every problem either. I think their second statement "there may simply be no way to coax our data set or tree to fit the assumptions of our analysis!" is the stronger point, I would suggest removing the statement about general solutions.*
 
-XXX
+We have deleted the statement as suggested.
 
 >*[4] I was trying to think of continuous data that might create trouble for the PRC method. What came to mind were count data (restricted to integers, can't be below 0, e.g. petal number), though I recognize these are not necessarily continuous. At high values these behave more like continuous data, but at low numbers you are likely to get a lot of tied ranks in the PRC method. Maybe its out of scope of this paper, but I think it would be helpful if the authors could comment on what properties of continuous data might be more or less appropriate for this method - do they need to follow a normal distribution, should they be transformed, is the method more or less robust to violations of normality than contrasts?*
 
