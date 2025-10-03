@@ -131,12 +131,12 @@ Yes - added to the caption.
 
 >*- Overall, methods are clearly described and detailed information is available through R scripts thus allowing all the analyses to be replicated. Nonetheless, I would suggest adding some of the details to the main text of the manuscript as well. For example, the specific functions that were used for each simulation since some early career evolutionary biologists or undergraduate students in general might not be familiar with all the functions from the different R packages used.*
 
-NEED TO DO THIS WHEN APPROPRIATE
+TO DO 
 
 >*Validity of the findings*
 >*- All findings seem to be valid. In the discussion section, the authors provide some claims (L.262-269) that would benefit from additional information/support (e.g., citations and/or empirical demonstrations/simulations).*
 
-XXX
+TO DO
 
 >*- The authors describe, implement, and validate their new analytical approach; they also compare its statistical properties with other similar previous approaches.*
 
@@ -156,10 +156,10 @@ XXX
 
 >*(1) The authors clearly show that the PRC approach has comparable type I error rates (their Figure 2) to other phylogeny-aware approaches (e.g., IC-perm) when data is simulated under a BM or OU process (OU alpha within the range between 0.1 and ~2.0) or even better than such approaches (OU alpha greater than ~2.0). The authors also demonstrate that their approach has similar power to detect true correlations both under BM and OU (their Figure 3). After validating their approach, however, I was expecting that the authors would then proceed to apply the PRC approach to some use case with a real dataset. I am saying this because I think many readers, particularly early career evolutionary biologists, would like to see a pragmatic demonstration. For example, by applying the PRC approach instead of the IC-perm approach to an empirical dataset, would someone be able to reach a different conclusion on a study about the correlated evolution of some trait of interest? It could be either, (i) an example of a previously detected trait correlation now being dismissed because of the lower rate of type I error when using the PRC; or (ii) trait correlation now being detected because of the increased power of PRC. Something like these, but employing real data and with real consequences to evolutionary interpretations.*
 
-XXX
+TO DO
 
 >*(2) I remember reading a discussion some time ago about the best approach to shuffle PIC data when performing permutation tests with comparative data (Adams and Collyer, 2015; https://doi.org/10.1111/evo.12596). Although that discussion was done in a different context, I think it might be relevant to consider in the present manuscript. In the author’s opinion, would the results still be the same if instead of shuffling the data after calculating the standardized contrasts the shuffling was done at the stage of raw data? For example, would the author’s statements in the discussion (L.262-269) still be valid?*
 
-XXX
+We have experimented with this, and it does not work - that is, shuffling the tips results in a test with elevated type I error and less power than our "contrast shuffling" approach. As to how this compares with the Adams et al. approach, we are not sure. We think that one would need a more direct approach, but also that feels beyond the scope of our current paper.
 
 
