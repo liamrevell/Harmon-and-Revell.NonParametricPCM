@@ -57,7 +57,7 @@ We have deleted the statement as suggested.
 
 >*[4] I was trying to think of continuous data that might create trouble for the PRC method. What came to mind were count data (restricted to integers, can't be below 0, e.g. petal number), though I recognize these are not necessarily continuous. At high values these behave more like continuous data, but at low numbers you are likely to get a lot of tied ranks in the PRC method. Maybe its out of scope of this paper, but I think it would be helpful if the authors could comment on what properties of continuous data might be more or less appropriate for this method - do they need to follow a normal distribution, should they be transformed, is the method more or less robust to violations of normality than contrasts?*
 
-XXX
+NEED TO TRY THIS
 
 ## Reviewer 2
 
@@ -72,28 +72,28 @@ XXX
 >*- Key methodological steps or parameters if they differ across panels (e.g., alpha values in OU simulations).*
 >*Ensuring readers can interpret every panel without referring back to the text will greatly improve.*
 
-XXX
+All information is now included in the figure legends as requested.
 
 >*Minor Comments*
 >*1. Figures 1–4: Rewrite legends so they can stand alone (see above). Also, I do not understand what you mean by "Contrast sign test statistics w = 2" in Figure 1.*
 
-XXX
+Rewritten as suggested. We added this explanation to the legend of figure 1: "We also include the w-value of the contrast sign test (CST), which counts the number of times that the two contrasts for x and y have the same sign (w = 2 in this case)."
 
 >*2. Abbreviations: Expand all abbreviations on first use within each legend (e.g., “CST = contrast sign test”).*
 
-XXX
+Abbreviations are expanded in each figure legend.
 
 >*3. Permutation details: State the number of permutations (e.g., 999 or 9999) directly in the captions for Figures 2 and 3.*
 
-XXX
+This information is now included in the figure legends.
 
 >*4. Parameter definitions: In captions for OU results, clearly define alpha (e.g., alpha = strength of pull toward the optimum).*
 
-XXX
+Included now.
 
 >*5. Legend formatting: Use consistent terminology (e.g., “Standard” vs. “OLS”) between text and figure legends.*
 
-XXX
+We now use standard throughout, with OLS sometimes included to remove ambiguity.
 
 >*Experimental design*
 >*A simulation design is excellent*
@@ -110,7 +110,7 @@ XXX
 
 >*- Sufficient background knowledge and context provided. Suitable literature references provided. I would suggest maybe adding a few mentions to other approaches for assessing correlations between pairs of discrete traits as well.*
 
-XXX
+We now expand a bit on the concentrated changes test in the introduction.
 
 >*- The authors joined some of the “standard sections” (i.e., Materials & Methods and Results) as “Description of the method” and “Statistical properties of the method”. The particular structure is not an issue for me. Nonetheless, some readers might not easily find all the information needed because results/methods are mixed together.*
 
@@ -118,7 +118,7 @@ We prefer the current organization, but could consider changes upon request from
 
 >*- All figures are relevant, with sufficient resolution, and appropriately described. Are the x-axes in Figures 2b and 3b in logarithmic scale? If so, please add to the caption.*
 
-XXX
+Yes - added to the caption.
 
 >*- All code and data are available through the authors’ GitHub repository.*
 
@@ -131,7 +131,7 @@ XXX
 
 >*- Overall, methods are clearly described and detailed information is available through R scripts thus allowing all the analyses to be replicated. Nonetheless, I would suggest adding some of the details to the main text of the manuscript as well. For example, the specific functions that were used for each simulation since some early career evolutionary biologists or undergraduate students in general might not be familiar with all the functions from the different R packages used.*
 
-XXX
+NEED TO DO THIS WHEN APPROPRIATE
 
 >*Validity of the findings*
 >*- All findings seem to be valid. In the discussion section, the authors provide some claims (L.262-269) that would benefit from additional information/support (e.g., citations and/or empirical demonstrations/simulations).*
