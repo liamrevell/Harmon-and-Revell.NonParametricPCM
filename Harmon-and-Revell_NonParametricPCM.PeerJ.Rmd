@@ -376,6 +376,10 @@ stopCluster(mc)
 save.image(file="typeI-error-analysis.Rdata")
 ```
 ```{r Harmon-fig2, echo=FALSE, fig.width=11, fig.height=5.5, dpi=300, fig.cap="Results of the analysis of type I error based on 1000 simulated trees with associated data. (a) Type I error of both a standard (non-phylogenetic) correlation, and various phylogenetic correlations, when data for \\emph{X} and \\emph{Y} were simulated under a Brownian motion model, for various total number of taxa, \\emph{N}. (b) Type I error for standard and phylogenetic correlation tests when data were simulated under an Ornstein-Uhlenbeck process, for various values of $\\alpha$, the strength of the pull towards the OU optimum, plotted on a log scale. Legend labels are as follows: ``Standard,\" non-phylogenetic correlation; ``IC,\" correlation test based on contrasts; ``IC Perm,\" same as ``IC,\" but in which a null distribution of the test statistic was obtained via permutation of the contrasts; ``PRC,\" phylogenetic rank correlation (of this article); and ``CST,\" contrasts sign test of Ackerly (2000).", out.width = "100%"}
+```
+
+
+```{r Harmon-fig2, echo=FALSE, fig.width=11, fig.height=5.5, dpi=300, fig.cap="Results of the analysis of type I error based on 1000 simulated trees with associated data. (a) Type I error of both a standard (non-phylogenetic) correlation, and various phylogenetic correlations, when data for \\emph{X} and \\emph{Y} were simulated under a Brownian motion model, for various total number of taxa, \\emph{N}. (b) Type I error for standard and phylogenetic correlation tests when data were simulated under an Ornstein-Uhlenbeck process, for various values of $\\alpha$, the strength of the pull towards the OU optimum, plotted on a log scale. Legend labels are as follows: ``Standard,\" non-phylogenetic correlation; ``IC,\" correlation test based on contrasts; ``IC Perm,\" same as ``IC,\" but in which a null distribution of the test statistic was obtained via permutation of the contrasts; ``PRC,\" phylogenetic rank correlation (of this article); and ``CST,\" contrasts sign test of Ackerly (2000).", out.width = "100%"}
 ## load Rdata
 load("typeI-error-analysis.Rdata")
 
