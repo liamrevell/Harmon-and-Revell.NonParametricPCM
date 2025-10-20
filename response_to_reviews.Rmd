@@ -57,7 +57,13 @@ We have deleted the statement as suggested.
 
 >*[4] I was trying to think of continuous data that might create trouble for the PRC method. What came to mind were count data (restricted to integers, can't be below 0, e.g. petal number), though I recognize these are not necessarily continuous. At high values these behave more like continuous data, but at low numbers you are likely to get a lot of tied ranks in the PRC method. Maybe its out of scope of this paper, but I think it would be helpful if the authors could comment on what properties of continuous data might be more or less appropriate for this method - do they need to follow a normal distribution, should they be transformed, is the method more or less robust to violations of normality than contrasts?*
 
-NEED TO TRY THIS
+We were curious about tied ranks, and so we tried this suggestion. We simulated count data using a continuous-time discrete state model on phylogenetic trees. Following the simulations already in the paper, all trees had a total depth of 1. We simulated two characters where counts could increase or decrease at a single rate (1.0), and the two characters were simulated independently - making this a test of type-I error under this model violation. We found that type I error rates were only elevated using standard anayses and that all of the comparative methods - our own included - exhibited appropriate type I error rates. Of course this is a small simulation under a very limited parameter space but shows that at least under some conditions our method is robust to the presence of ties in species' trait values.A figure follows, and code to reproduce is in our github repo as "count_data_test.R."
+
+![image]("count_test_results.jpg")
+
+Of course, this model still has the property that differences accumulate with time. We suspect that there are ways to generate data that violate that assumption and cause problems with our approach.
+
+Having done this, we feel it is a bit beyond the scope of the current paper and thus, for now, do not include it in the text.
 
 ## Reviewer 2
 
@@ -131,12 +137,12 @@ Yes - added to the caption.
 
 >*- Overall, methods are clearly described and detailed information is available through R scripts thus allowing all the analyses to be replicated. Nonetheless, I would suggest adding some of the details to the main text of the manuscript as well. For example, the specific functions that were used for each simulation since some early career evolutionary biologists or undergraduate students in general might not be familiar with all the functions from the different R packages used.*
 
-TO DO 
+We now specifically list all functions used in the analysis inthe text of the manuscript.
 
 >*Validity of the findings*
 >*- All findings seem to be valid. In the discussion section, the authors provide some claims (L.262-269) that would benefit from additional information/support (e.g., citations and/or empirical demonstrations/simulations).*
 
-TO DO
+We have lightened the claims a bit and added additional citations.
 
 >*- The authors describe, implement, and validate their new analytical approach; they also compare its statistical properties with other similar previous approaches.*
 
