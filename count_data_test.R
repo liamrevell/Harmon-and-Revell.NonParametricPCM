@@ -1,7 +1,8 @@
 # install.packages(c("ape","phytools"))  # if needed
 library(ape)
 library(phytools)
-
+library(parallel)
+library(doParallel)
 # Simulate count data on a tree under a stepwise Mk model with two rates
 simulate_mk_counts <- function(tree,
                                q_up, q_down,           # rates for +1 and -1
@@ -101,9 +102,9 @@ picRegression <- function (tree, x, y, method="standard", sigTest="permutation",
     icy<-ape::pic(y, tree)
     xPos<-icx>0
     yPos<-icy>0
-    testStat<-sum(xPos==yPos)
-    pValueLow<-2*pbinom(testStat, length(icx), prob=0.5)
-    pValueHigh<-2*pbinom(length(icx)-testStat, length(icx), prob=0.5)
+    testStat<-sum(xPos==yPos & icx!=icy)
+    pValueLow<-2*pbinom(testStat, sum(icx!=icy), prob=0.5)
+    pValueHigh<-2*pbinom(length(icx)-testStat, sum(icx!=icy), prob=0.5)
     pVal<-min(pValueHigh, pValueLow)
   }
   
@@ -149,8 +150,8 @@ tr <- ape::rtree(80)
 # Up-steps twice as likely as down-steps; lower bound at 0
 sim1 <- simulate_mk_counts(tr, q_up = 0.6, q_down = 0.3,
                            max_state = 60, root_state = 0, nsim=2)
-sim2 <- simulate_mk_counts(tr, q_up = 0.6, q_down = 0.3,
-                           max_state = 60, root_state = 0)
+
+picRegression(tr, sim1[,1], sim1[,2], method="sign")
 
 # repeat fig 2
 
@@ -163,6 +164,9 @@ ns<-1000
 sim_trees<-foreach(i=1:length(ntaxa))%dopar%{
   phytools::pbtree(n=ntaxa[i],scale=1,nsim=ns)
 }
+r0<-r1<-r2<-r3<-r4<-
+  vector(mode="list",length=ns)
+
 
 ## create matrices for results
 pStandard<-pContrasts<-pContrastsPerm<-pRank<-
@@ -222,8 +226,7 @@ lines(x, t1ContrastsPerm, lwd=2, col="black", lty=3)
 lines(x, t1Rank, lwd=2, col="grey")
 lines(x, t1Sign, lwd=2, col="grey", lty=2)
 grid()
-#legend("topleft", lwd=2, col=c("black", "black", "black", 
-                               "grey", "grey"), legend=c("Standard", "IC", "IC Perm", 
+legend("topleft", lwd=2,, cex=0.5, col=c("black", "black", "black", "grey", "grey"), legend=c("Standard", "IC", "IC Perm", 
                                                          "PRC" , "CST"), lty=c(1, 2,3, 1, 2), bg="white")
 mtext("Type I error rate under count data",
       line=2,adj=0)
