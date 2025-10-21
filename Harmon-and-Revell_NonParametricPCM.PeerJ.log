@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2025.10.6)  20 OCT 2025 16:46
+This is pdfTeX, Version 3.141592653-2.6-1.40.28 (TeX Live 2025) (preloaded format=pdflatex 2025.10.6)  21 OCT 2025 14:54
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -703,7 +703,7 @@ File: ot1pcr.fd 2001/06/04 font definitions for OT1/pcr.
 {c:/Users/lukeh/AppData/Roaming/TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{c:/Users/lukeh/AppData/Roaming/TinyTeX/texmf-dist/fonts/enc/dvips/base/8r.enc}]
 
 [2]
-<Harmon-fig1.pdf, id=55, 794.97pt x 794.97pt>
+<Harmon-fig1.pdf, id=59, 794.97pt x 794.97pt>
 File: Harmon-fig1.pdf Graphic file (type pdf)
 <use Harmon-fig1.pdf>
 Package pdftex.def Info: Harmon-fig1.pdf  used on input line 155.
@@ -715,7 +715,7 @@ Package pdftex.def Info: Harmon-fig1.pdf  used on input line 155.
 [4 <./Harmon-fig1.pdf>]
 
 [5]
-<Harmon-and-Revell_NonParametricPCM.PeerJ_files/figure-latex/Harmon-fig2-1.pdf, id=105, 794.97pt x 397.485pt>
+<Harmon-and-Revell_NonParametricPCM.PeerJ_files/figure-latex/Harmon-fig2-1.pdf, id=109, 794.97pt x 397.485pt>
 File: Harmon-and-Revell_NonParametricPCM.PeerJ_files/figure-latex/Harmon-fig2-1.pdf Graphic file (type pdf)
 <use Harmon-and-Revell_NonParametricPCM.PeerJ_files/figure-latex/Harmon-fig2-1.pdf>
 Package pdftex.def Info: Harmon-and-Revell_NonParametricPCM.PeerJ_files/figure-latex/Harmon-fig2-1.pdf  used on input line 186.
@@ -730,12 +730,12 @@ Underfull \vbox (badness 1173) has occurred while \output is active []
 
 
 [6 <./Harmon-and-Revell_NonParametricPCM.PeerJ_files/figure-latex/Harmon-fig2-1.pdf>]
-<Harmon-and-Revell_NonParametricPCM.PeerJ_files/figure-latex/Harmon-fig3-1.pdf, id=118, 794.97pt x 397.485pt>
+<Harmon-and-Revell_NonParametricPCM.PeerJ_files/figure-latex/Harmon-fig3-1.pdf, id=122, 794.97pt x 397.485pt>
 File: Harmon-and-Revell_NonParametricPCM.PeerJ_files/figure-latex/Harmon-fig3-1.pdf Graphic file (type pdf)
 <use Harmon-and-Revell_NonParametricPCM.PeerJ_files/figure-latex/Harmon-fig3-1.pdf>
 Package pdftex.def Info: Harmon-and-Revell_NonParametricPCM.PeerJ_files/figure-latex/Harmon-fig3-1.pdf  used on input line 198.
 (pdftex.def)             Requested size: 415.12572pt x 207.56676pt.
-<Harmon-and-Revell_NonParametricPCM.PeerJ_files/figure-latex/Harmon-fig4-1.pdf, id=119, 794.97pt x 397.485pt>
+<Harmon-and-Revell_NonParametricPCM.PeerJ_files/figure-latex/Harmon-fig4-1.pdf, id=123, 794.97pt x 397.485pt>
 File: Harmon-and-Revell_NonParametricPCM.PeerJ_files/figure-latex/Harmon-fig4-1.pdf Graphic file (type pdf)
 <use Harmon-and-Revell_NonParametricPCM.PeerJ_files/figure-latex/Harmon-fig4-1.pdf>
 Package pdftex.def Info: Harmon-and-Revell_NonParametricPCM.PeerJ_files/figure-latex/Harmon-fig4-1.pdf  used on input line 206.
@@ -748,6 +748,13 @@ Underfull \vbox (badness 1490) has occurred while \output is active []
 [7]
 
 [8 <./Harmon-and-Revell_NonParametricPCM.PeerJ_files/figure-latex/Harmon-fig3-1.pdf> <./Harmon-and-Revell_NonParametricPCM.PeerJ_files/figure-latex/Harmon-fig4-1.pdf>]
+LaTeX Font Info:    Trying to load font information for OML+ptm on input line 213.
+(c:/Users/lukeh/AppData/Roaming/TinyTeX/texmf-dist/tex/latex/psnfss/omlptm.fd
+File: omlptm.fd 
+)
+LaTeX Font Info:    Font shape `OML/ptm/m/n' in size <10> not available
+(Font)              Font shape `OML/cmm/m/it' tried instead on input line 213.
+
 
 [9]
 
@@ -769,21 +776,21 @@ L3 programming layer <2025-09-02>
 LaTeX Warning: There were multiply-defined labels.
 
 Package rerunfilecheck Info: File `Harmon-and-Revell_NonParametricPCM.PeerJ.out' has not changed.
-(rerunfilecheck)             Checksum: 525CA3912E7C65B78F76B3ED5020CCC6;1132.
+(rerunfilecheck)             Checksum: D018C2ED14FA2933E8FF9C0B8BF6048E;1263.
  ) 
 Here is how much of TeX's memory you used:
- 18535 strings out of 469685
- 308402 string characters out of 5474307
- 868837 words of memory out of 5000000
- 46305 multiletter control sequences out of 15000+600000
+ 18564 strings out of 469685
+ 308908 string characters out of 5474307
+ 869878 words of memory out of 5000000
+ 46330 multiletter control sequences out of 15000+600000
  683804 words of font info for 312 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
  88i,11n,91p,2094b,583s stack positions out of 10000i,1000n,20000p,200000b,200000s
 <c:/Users/lukeh/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb><c:/Users/lukeh/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb><c:/Users/lukeh/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb><c:/Users/lukeh/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/urw/courier/ucrr8a.pfb><c:/Users/lukeh/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvb8a.pfb><c:/Users/lukeh/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/urw/helvetic/uhvr8a.pfb><c:/Users/lukeh/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/urw/symbol/usyr.pfb><c:/Users/lukeh/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/urw/symbol/usyr.pfb><c:/Users/lukeh/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/urw/times/utmb8a.pfb><c:/Users/lukeh/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/urw/times/utmr8a.pfb><c:/Users/lukeh/AppData/Roaming/TinyTeX/texmf-dist/fonts/type1/urw/times/utmri8a.pfb>
-Output written on Harmon-and-Revell_NonParametricPCM.PeerJ.pdf (12 pages, 359524 bytes).
+Output written on Harmon-and-Revell_NonParametricPCM.PeerJ.pdf (12 pages, 360589 bytes).
 PDF statistics:
- 364 PDF objects out of 1000 (max. 8388607)
- 303 compressed objects within 4 object streams
- 86 named destinations out of 1000 (max. 500000)
- 85589 words of extra memory for PDF output out of 89155 (max. 10000000)
+ 368 PDF objects out of 1000 (max. 8388607)
+ 307 compressed objects within 4 object streams
+ 87 named destinations out of 1000 (max. 500000)
+ 85597 words of extra memory for PDF output out of 89155 (max. 10000000)
 
